@@ -1,0 +1,7 @@
+en:
+  blazer: "Blazer"
+  notify_o11y: "Notify observability"
+  devise:
+    omniauth_callbacks:
+      user:
+        login_failed: "Login failed..."
