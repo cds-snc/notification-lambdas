@@ -1,0 +1,67 @@
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Sono:wght@200;500&display=swap');
+
+    .centre {
+        position: relative;
+        height: 100%;
+    }
+
+    .g_id_signin {
+        position: absolute;
+        z-index: 10;
+        top: 20px;
+        right: 20px;
+    }
+
+    .title {
+        position: absolute;
+        z-index: 5;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .title h1 {
+        font: 500 6.6em 'Sono', sans-serif;
+        text-transform: uppercase;        
+        margin: 0;
+        color: #2d5c9a;
+    }
+
+    .title h2 {
+        font: 200 2em 'Sono', sans-serif;
+        text-transform: lowercase;
+        margin: 0 0 1.5em 0;
+    }
+
+    .title .error {
+        padding: 1em;
+        font: 200 1em 'Sono', sans-serif;
+        color: #ba0000;
+        border: 1px solid #ba0000;
+    }
+</style>
+
+<div id="g_id_onload"
+     data-client_id="<%= ENV["GOOGLE_OAUTH_CLIENT_ID"] %>"
+     data-auto_select="<%= !params[:auto_login].present? || params[:auto_login] %>"
+     data-login_uri="<%= user_google_oauth2_omniauth_authorize_path %>">
+</div>
+
+<div class="centre">
+    <div class="g_id_signin" 
+        data-type="standard" 
+        data-shape="pill">
+    </div>
+    <div class="title">
+        <h1><%= @auto_login %> <%= t :blazer %></h1>
+        <h2><%= t :notify_o11y %></h2>
+
+        <% flash.each do |type, msg| %>
+            <% if type == "error" %>
+                <div class="<%= type %>"><%= msg %></div>
+            <% end %>
+        <% end %>
+    </div>
+</div>

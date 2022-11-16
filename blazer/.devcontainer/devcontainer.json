@@ -1,0 +1,20 @@
+{
+  "name": "blazer",
+  "image": "mcr.microsoft.com/vscode/devcontainers/base:buster",
+  "features": {
+    "docker-from-docker": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ruby": "3.0.4"
+  },
+  "containerEnv": {
+    "SHELL": "/bin/zsh"
+  },
+  "extensions": [
+    "github.copilot"
+  ],
+  "remoteUser": "vscode",
+  "postCreateCommand": "./.devcontainer/postCreateCommand.sh"
+}
