@@ -1,0 +1,19 @@
+{
+  "name": "google-cidr",
+  "image": "mcr.microsoft.com/vscode/devcontainers/python:3.9-buster",
+  "features": {
+    "docker-from-docker": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v2"
+    },
+  },
+  "containerEnv": {
+    "SHELL": "/bin/zsh"
+  },
+  "extensions": [
+    "github.copilot"
+  ],
+  "remoteUser": "vscode",
+  "postCreateCommand": "./.devcontainer/postCreateCommand.sh"
+}
