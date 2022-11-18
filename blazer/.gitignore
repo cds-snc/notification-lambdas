@@ -1,5 +1,6 @@
-log
+.bundle
+.env
 .vagrant
+log
 tmp
 *.log
-.env

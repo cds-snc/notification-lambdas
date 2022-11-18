@@ -1,8 +1,11 @@
 default: 
 	python3 cidr.py
 
+docker:
+	docker build -t lambda/google-cidr .
+
 fmt:
-	black .
+	black . $(ARGS)
 
 install:
 	pip3 install --user -r requirements-dev.txt &&\
@@ -16,6 +19,7 @@ test:
 
 .PHONY: \
 	default \
+	docker \
 	fmt \
 	install	\
 	lint \

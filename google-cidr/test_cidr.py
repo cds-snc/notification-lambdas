@@ -1,4 +1,3 @@
-import pytest
 import cidr
 
 from unittest.mock import call, MagicMock, patch
@@ -161,7 +160,16 @@ def test_handler(
 @patch("cidr.get_google_cidrs")
 def test_handler_no_cidrs(mock_get_google_cidrs):
     mock_get_google_cidrs.return_value = set()
-    assert cidr.handler() == {"statusCode": 404, "body": "No Google CIDRs found"}
+    assert cidr.handler() == {"statusCode": 422, "body": "No Google CIDRs found"}
+
+
+@patch("cidr.get_google_cidrs")
+def test_handler_over_100_cidrs(mock_get_google_cidrs):
+    mock_get_google_cidrs.return_value = set([i for i in range(101)])
+    assert cidr.handler() == {
+        "statusCode": 422,
+        "body": "Too many Google CIDRs found (over 100 is not supported)",
+    }
 
 
 @patch("cidr.boto3")

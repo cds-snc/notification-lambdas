@@ -105,8 +105,14 @@ def handler():
     google_cidrs = get_google_cidrs(IPRANGE_URLS)
 
     if len(google_cidrs) == 0:
-        logging.error("ERROR: No Google service CIDR ranges found")
-        return {"statusCode": 404, "body": "No Google CIDRs found"}
+        logging.error("ERROR: failed to retrieve Google service CIDR ranges")
+        return {"statusCode": 422, "body": "No Google CIDRs found"}
+    if len(google_cidrs) > 100:
+        logging.error("ERROR: the security group can only support 100 rules.")
+        return {
+            "statusCode": 422,
+            "body": "Too many Google CIDRs found (over 100 is not supported)",
+        }
 
     ec2_client = get_boto_client("ec2")
     version = get_prefix_list_version(ec2_client, PREFIX_LIST_ID)

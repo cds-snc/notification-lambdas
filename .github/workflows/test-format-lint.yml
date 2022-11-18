@@ -1,0 +1,65 @@
+name: Test, format and lint
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-format-lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lambda: blazer
+            ruby: 3.0.4
+          - lambda: google-cidr
+            python: 3.9
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+
+      - uses: dorny/paths-filter@4512585405083f25c027a35db413c2b3b9006d50 # tag=v2.11.1
+        id: changes
+        with:
+          filters: |
+            lambda:
+              - '${{ matrix.lambda }}/**'
+              - '.github/workflows/test-fmt-lint.yml'
+
+      - name: Setup Python
+        if: steps.changes.outputs.lambda == 'true' && matrix.python
+        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # tag=v4.3.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Setup Ruby
+        if: steps.changes.outputs.lambda == 'true' && matrix.ruby
+        uses: ruby/setup-ruby@c4fe7bd15ddbfcd5e07e47bf2f2cae90581d6091 # tag=v1.123.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Install deps
+        if: steps.changes.outputs.lambda == 'true'
+        working-directory: ${{ matrix.lambda }}
+        run: make install
+
+      - name: Lint
+        if: steps.changes.outputs.lambda == 'true'
+        working-directory: ${{ matrix.lambda }}
+        run: make lint
+
+      - name: Format
+        if: steps.changes.outputs.lambda == 'true'
+        working-directory: ${{ matrix.lambda }}
+        run: make ARGS=--check fmt
+
+      - name: Test
+        if: steps.changes.outputs.lambda == 'true'
+        working-directory: ${{ matrix.lambda }}
+        run: make test
