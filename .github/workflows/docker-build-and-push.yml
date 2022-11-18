@@ -35,7 +35,7 @@ jobs:
           filters: |
             lambda:
               - '${{ matrix.lambda }}/**'
-              - '.github/workflows/docker-build.yml'
+              - '.github/workflows/docker-build-and-push.yml'
 
       - name: Build Docker image
         if: steps.changes.outputs.lambda == 'true'

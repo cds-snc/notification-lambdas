@@ -28,7 +28,7 @@ jobs:
           filters: |
             lambda:
               - '${{ matrix.lambda }}/**'
-              - '.github/workflows/test-fmt-lint.yml'
+              - '.github/workflows/test-format-lint.yml'
 
       - name: Setup Python
         if: steps.changes.outputs.lambda == 'true' && matrix.python

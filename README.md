@@ -7,5 +7,5 @@ A collection of Docker lambda functions and images that are used as part of the 
 
 ## Adding a new lambda
 1. Run `make lambda` and provide a name for your lambda's folder.
-1. Add your lambda's folder name to the `matrix` sections of the  the GitHub workflows.  You can find the ones you need to update with `make matrix`.
+1. Add your lambda's folder name to the `matrix` sections of the GitHub workflows.  You can find the ones you need to update with `make matrix`.
 1. Update this readme with a link to your lambda's readme.
