@@ -1,0 +1,68 @@
+name: Docker image build
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ECR_SUFFIX: ".dkr.ecr.ca-central-1.amazonaws.com"
+  STAGING_ACCOUNT_ID: "239043911459"
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lambda: blazer
+            image: database-tools/blazer
+          - lambda: google-cidr
+            image: lambda/google-cidr
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+
+      - uses: dorny/paths-filter@4512585405083f25c027a35db413c2b3b9006d50 # tag=v2.11.1
+        id: changes
+        with:
+          filters: |
+            lambda:
+              - '${{ matrix.lambda }}/**'
+              - '.github/workflows/docker-build-and-push.yml'
+
+      - name: Build Docker image
+        if: steps.changes.outputs.lambda == 'true'
+        working-directory: ${{ matrix.lambda }}
+        run: make docker
+
+      # Staging image push
+      - name: Staging AWS credentials
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
+        with:
+          role-to-assume: arn:aws:iam::${{ env.STAGING_ACCOUNT_ID }}:role/notification-lambdas-apply
+          role-session-name: ECRPush
+          aws-region: ca-central-1
+
+      - name: Staging ECR login
+        id: staging-ecr
+        uses: aws-actions/amazon-ecr-login@261a7de32bda11ba01f4d75c4ed6caf3739e54be # v1.5.3
+
+      - name: Staging ECR push
+        run: |
+          $STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:latest
+          docker push $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker push $STAGING_ECR/${{ matrix.image }}:latest
+
+      - name: Staging ECR logout
+        run: docker logout ${{ steps.staging-ecr.outputs.registry }}
+
+      # TODO: Production image push
