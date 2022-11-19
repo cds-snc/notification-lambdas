@@ -23,6 +23,5 @@ gem "omniauth-google-oauth2"
 
 group :development, :test do
   gem "debug", require: false
-  gem "rubocop", require: false
-  gem "rufo", require: false
+  gem "standard", require: false
 end

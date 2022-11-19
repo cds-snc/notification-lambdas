@@ -5,14 +5,14 @@ docker:
 	docker build -t database-tools/blazer:latest .
 
 fmt:
-	rufo . $(ARGS)
+	standardrb --fix
 
 install:
 	bundle config set --local with 'development test' &&\
 	bundle install
 
-lint: # todo: fix rubocop errors
-	echo "::warning file=blazer/Makefile,line=14,col=1::lint is not setup..."
+lint:
+	standardrb
 
 test: # todo: write controller and user model tests
 	echo "::warning file=blazer/Makefile,line=17,col=1::test is not setup..."
