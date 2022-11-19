@@ -23,5 +23,6 @@ gem "omniauth-google-oauth2"
 
 group :development, :test do
   gem "debug", require: false
+  gem "rspec-rails", require: false
   gem "standard", require: false
 end
