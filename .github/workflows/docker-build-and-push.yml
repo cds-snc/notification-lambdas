@@ -1,4 +1,4 @@
-name: Docker image build
+name: Docker image build and push
 
 on:
   push:
@@ -56,7 +56,7 @@ jobs:
 
       - name: Staging ECR push
         run: |
-          $STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
           docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA
           docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:latest
           docker push $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA
