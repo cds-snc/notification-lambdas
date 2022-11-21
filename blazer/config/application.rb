@@ -3,17 +3,15 @@ Bundler.require
 
 require "rails"
 
-%w(
+%w[
   active_record/railtie
   action_controller/railtie
   action_mailer/railtie
   action_view/railtie
   sprockets/railtie
-).each do |railtie|
-  begin
-    require railtie
-  rescue LoadError
-  end
+].each do |railtie|
+  require railtie
+rescue LoadError
 end
 
 abort "No DATABASE_URL" unless ENV["DATABASE_URL"]
@@ -25,16 +23,16 @@ module BlazerSolo
       # does not check data sources
       # not protected by auth, so do not expose data
       get "health", to: ->(env) {
-                      if Blazer::Connection.connection.active?
-                        [200, {}, ["OK"]]
-                      else
-                        [503, {}, ["Service Unavailable"]]
-                      end
-                    }
+                          if Blazer::Connection.connection.active?
+                            [200, {}, ["OK"]]
+                          else
+                            [503, {}, ["Service Unavailable"]]
+                          end
+                        }
 
       devise_for :users, controllers: {
-                           omniauth_callbacks: "users/omniauth_callbacks",
-                         }
+        omniauth_callbacks: "users/omniauth_callbacks"
+      }
 
       authenticate :user, ->(user) { user.present? } do
         mount Blazer::Engine, at: "/"
@@ -48,7 +46,7 @@ module BlazerSolo
     config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"] != "disabled"
 
     if ENV["RAILS_LOG_TO_STDOUT"] != "disabled"
-      logger = ActiveSupport::Logger.new(STDOUT)
+      logger = ActiveSupport::Logger.new($stdout)
       logger.formatter = config.log_formatter
       config.logger = ActiveSupport::TaggedLogging.new(logger)
     end
