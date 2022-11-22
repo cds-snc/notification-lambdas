@@ -12,6 +12,7 @@ permissions:
 env:
   ECR_SUFFIX: ".dkr.ecr.ca-central-1.amazonaws.com"
   STAGING_ACCOUNT_ID: "239043911459"
+  PRODUCTION_ACCOUNT_ID: "296255494825"
 
 jobs:
   docker-build:
@@ -69,4 +70,29 @@ jobs:
         if: steps.changes.outputs.lambda == 'true'
         run: docker logout ${{ steps.staging-ecr.outputs.registry }}
 
-      # TODO: Production image push
+      # Production image push
+      - name: Production AWS credentials
+        if: steps.changes.outputs.lambda == 'true'
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
+        with:
+          role-to-assume: arn:aws:iam::${{ env.PRODUCTION_ACCOUNT_ID }}:role/notification-lambdas-apply
+          role-session-name: ECRPush
+          aws-region: ca-central-1
+
+      - name: Production ECR login
+        if: steps.changes.outputs.lambda == 'true'
+        id: production-ecr
+        uses: aws-actions/amazon-ecr-login@261a7de32bda11ba01f4d75c4ed6caf3739e54be # v1.5.3
+
+      - name: Production ECR push
+        if: steps.changes.outputs.lambda == 'true'
+        run: |
+          PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:latest
+          docker push $PRODUCTION_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker push $PRODUCTION_ECR/${{ matrix.image }}:latest
+
+      - name: Production ECR logout
+        if: steps.changes.outputs.lambda == 'true'
+        run: docker logout ${{ steps.production-ecr.outputs.registry }}
