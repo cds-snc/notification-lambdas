@@ -1,7 +1,7 @@
 <% blazer_title @query.name %>
 
 <% if @success %>
-  <% run_data = { statement: @query.statement, query_id: @query.id, data_source: @query.data_source, variables: variable_params(@query) } %>
+  <% run_data = {statement: @query.statement, query_id: @query.id, data_source: @query.data_source, variables: variable_params(@query)} %>
   <% run_data.merge!(forecast: "t") if params[:forecast] %>
   <% run_data.merge!(cohort_period: params[:cohort_period]) if params[:cohort_period] %>
   <% run_data.transform_keys!(&:to_s) if Rails::VERSION::MAJOR < 6 %>
@@ -19,6 +19,10 @@
       <div class="col-sm-3 text-right">
         <%= link_to "Edit", edit_query_path(@query, params: variable_params(@query)), class: "btn btn-default", disabled: !@query.editable?(blazer_user) %>
         <%= link_to "Fork", new_query_path(params: variable_params(@query).merge(fork_query_id: @query.id, data_source: @query.data_source, name: @query.name)), class: "btn btn-info" %>
+
+        <% if !@error && @success %>
+          <%= button_to "Download", run_queries_path(format: "csv"), params: run_data, class: "btn btn-primary", data: {confirm: "Please confirm there is no protected data before downloading"} %>
+        <% end %>
       </div>
     </div>
   </div>
@@ -40,7 +44,7 @@
   <p><%= @query.description %></p>
 <% end %>
 
-<%= render partial: "blazer/variables", locals: { action: query_path(@query) } %>
+<%= render partial: "blazer/variables", locals: {action: query_path(@query)} %>
 
 <pre id="code"><code><%= @statement.display_statement %></code></pre>
 

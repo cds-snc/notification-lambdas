@@ -1,6 +1,7 @@
 require "bundler/setup"
 Bundler.require
 
+require "json"
 require "rails"
 
 %w[
@@ -47,7 +48,10 @@ module BlazerSolo
 
     if ENV["RAILS_LOG_TO_STDOUT"] != "disabled"
       logger = ActiveSupport::Logger.new($stdout)
-      logger.formatter = config.log_formatter
+      logger.formatter = proc do |severity, datetime, progname, msg|
+        date_format = datetime.strftime("%Y-%m-%d %H:%M:%S %z")
+        JSON.dump(date: date_format.to_s, severity: severity.ljust(5).to_s, message: msg) + "\n"
+      end
       config.logger = ActiveSupport::TaggedLogging.new(logger)
     end
   end
