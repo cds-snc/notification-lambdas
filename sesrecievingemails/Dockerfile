@@ -1,0 +1,14 @@
+# Docker image for the SES recieving emails hitting the lambda API.
+
+FROM public.ecr.aws/lambda/python:3.9
+
+ENV PYTHONDONTWRITEBYTECODE 1
+
+# Install the function's dependencies
+COPY sesrecievingemails/requirements_for_ses.py ${LAMBDA_TASK_ROOT}
+RUN python -m pip install -r requirements_for_ses.txt
+
+# Copy function code
+COPY sesrecievingemails/ses_recieving_emails.py ${LAMBDA_TASK_ROOT}
+
+CMD [ "ses_recieving_emails.lambda_handler" ]
