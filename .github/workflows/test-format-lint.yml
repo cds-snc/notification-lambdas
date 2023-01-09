@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
 
       - uses: dorny/paths-filter@4512585405083f25c027a35db413c2b3b9006d50 # tag=v2.11.1
         id: changes
@@ -32,14 +32,14 @@ jobs:
 
       - name: Setup Python
         if: steps.changes.outputs.lambda == 'true' && matrix.python
-        uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984 # tag=v4.3.0
+        uses: actions/setup-python@5ccb29d8773c3f3f653e1705f474dfaa8a06a912 # v4.4.0
         with:
           python-version: ${{ matrix.python }}
           cache: pip
 
       - name: Setup Ruby
         if: steps.changes.outputs.lambda == 'true' && matrix.ruby
-        uses: ruby/setup-ruby@c4fe7bd15ddbfcd5e07e47bf2f2cae90581d6091 # tag=v1.123.0
+        uses: ruby/setup-ruby@09c10210cc6e998d842ce8433cd9d245933cd797 # v1.133.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
