@@ -7,7 +7,7 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 env:
   ECR_SUFFIX: ".dkr.ecr.ca-central-1.amazonaws.com"
@@ -96,3 +96,12 @@ jobs:
       - name: Production ECR logout
         if: steps.changes.outputs.lambda == 'true'
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
+
+      - name: Generate docker SBOM
+        if: steps.changes.outputs.lambda == 'true'
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@a38917b147dfc8f086abcf81529e3c12f26529b8 # v2.1.0
+        with:
+          docker_image: "${{ matrix.image }}"
+          dockerfile_path: "${{ matrix.lambda }}/Dockerfile"
+          sbom_name: "${{ matrix.lambda }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"        
