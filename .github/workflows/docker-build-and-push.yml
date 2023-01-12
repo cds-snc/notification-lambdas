@@ -99,7 +99,7 @@ jobs:
 
       - name: Generate docker SBOM
         if: steps.changes.outputs.lambda == 'true'
-        uses: cds-snc/security-tools/.github/actions/generate-sbom@a38917b147dfc8f086abcf81529e3c12f26529b8 # v2.1.0
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@19c655b47ec24d168ecbc701cee18701ab55f071 # v2.1.1
         with:
           docker_image: "${{ matrix.image }}"
           dockerfile_path: "${{ matrix.lambda }}/Dockerfile"
