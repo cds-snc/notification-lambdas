@@ -70,7 +70,9 @@ def notify_service_in_recipients(recipients):
 
 
 def lambda_handler(event, context):
+    print("SQS region {}".format(SQS_REGION))
     sqs = boto3.resource('sqs', region_name=SQS_REGION)
+    print("QueueName {}{}".format(CELERY_QUEUE_PREFIX, CELERY_QUEUE))
     queue = sqs.get_queue_by_name(QueueName=f"{CELERY_QUEUE_PREFIX}{CELERY_QUEUE}")
 
     # See the payload documentation
