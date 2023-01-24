@@ -1,3 +1,22 @@
+"""
+Listens on receiving emails on SES in the us-east-1 region.
+
+Upon receiving an email, it will create a Celery send-notify-no-reply task to 
+be put onto the notify-internal-tasks SQS queue. This will automatically get
+picked up by the Celery worker which will send a no-reply email to the 
+recipients.
+
+The lambda will filter out received emails that has the the sender containing
+a `no-reply` local part or the known GCNotify email address (currently 
+gc.notify.notification.gc) in the email address, in order to prevent no-reply
+loops and infinite email chains (it happened, several times).
+
+References:
+
+* Celery task to send no-reply emails: https://github.com/cds-snc/notification-api/blob/e5a88254e9b8ec0f6fbc7f1d5b92aba9ad6ce05e/app/celery/tasks.py#L666
+* AWS rule for emails receipt: https://us-east-1.console.aws.amazon.com/ses/home?region=us-east-1#/email-receiving/main/inbound-to-lambda/edit-rule
+"""
+
 import json
 import base64
 import boto3
@@ -15,6 +34,9 @@ CELERY_TASK_NAME = 'send-notify-no-reply'
 
 
 def to_queue(queue, data):
+    """Manually craft a Celery message with proper payload to be
+    sent on SQS and consumed by the appropriate target Celery worker.
+    """
     task = {
         "task": CELERY_TASK_NAME,
         "id": str(uuid.uuid4()),
