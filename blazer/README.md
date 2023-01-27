@@ -7,6 +7,7 @@
     - Authorized JavaScript origins: `http://localhost` and `http://localhost:8080`
     - Authorized redirect URIs: `http://localhost:8080/users/auth/google_oauth2/callback`
 1. Create a `.env` based on the `.env.example` and add your Google OAuth2 credentials.
+1. Edit the `docker-compose.yml` and change the `DATABASE_URL` and `BLAZER_DATABASE_URL` (suggestions are in file)
 1. Run `docker-compose up` and access at [http://localhost:8080](http://localhost:8080).
 1. Connect to the `web` service and run `rails db:migrate`.
 
