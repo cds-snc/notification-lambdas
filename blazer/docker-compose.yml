@@ -26,8 +26,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      DATABASE_URL: "postgres://postgres:postgres@host.docker.internal:5442/postgres"
-      BLAZER_DATABASE_URL: "postgresql://postgres:chummy@host.docker.internal:5432/notification_api" # connect to Notify devcontainer db
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5442/postgres"
+      BLAZER_DATABASE_URL: "postgres://postgres:postgres@localhost:5442/postgres"
+      # uncomment to run locally with docker-compose
+      # DATABASE_URL: "postgres://postgres:postgres@host.docker.internal:5442/postgres"
+      # BLAZER_DATABASE_URL: "postgresql://postgres:chummy@host.docker.internal:5432/notification_api"
     depends_on:
       - db
 
