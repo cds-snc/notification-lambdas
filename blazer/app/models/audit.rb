@@ -7,7 +7,7 @@ module Blazer
     private
 
     def log_user
-      logger.info "Audit #{user.email} ran '#{query.name}' query: '#{query.statement}'"
+      logger.info "Audit #{user.email} ran query: '#{statement}'"
     end
   end
 end
