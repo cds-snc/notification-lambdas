@@ -5,6 +5,9 @@ A collection of Docker lambda functions and images that are used as part of the 
 - [Blazer](./blazer/README.md): an instance of Blazer that uses Devise and Google OAuth for authentication.
 - [Google CIDR](./google-cidr/README.md): a function that updates an AWS managed prefix list with a list of Google service CIDR ranges.
 - [SES Receiving Emails](./sesreceivingemails/README.md): a function that handles incoming emails to GC Notify addresses
+- [SES email callback](./sesemailcallbacks/README.md): a function that handles incoming emails to GC Notify addresses
+- [SNS SMS callback](./snssmscallbacks/README.md): a function that handles incoming emails to GC Notify addresses
+
 ## Adding a new lambda
 1. Run `make lambda` and provide a name for your lambda's folder.
 1. Add your lambda's folder name to the `matrix` sections of the GitHub workflows.  You can find the ones you need to update with `make matrix`.
