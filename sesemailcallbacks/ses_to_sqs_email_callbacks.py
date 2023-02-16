@@ -9,6 +9,7 @@ def lambda_handler(event, context):
     queue = sqs.get_queue_by_name(
         QueueName='eks-notification-canada-cadelivery-receipts'
     )
+    print("Queue {}".format(queue))
     print("Task has begun")
     for record in event["Records"]:
         task = {
