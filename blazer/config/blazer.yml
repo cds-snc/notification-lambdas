@@ -29,6 +29,7 @@ data_sources:
 
     linked_columns:
       # user_id: "/admin/users/{value}"
+      service_id: "<%= ENV['NOTIFY_URL'] || 'https://notification.canada.ca' %>/services/{value}"
 
     smart_columns:
       # user_id: "SELECT id, name FROM users WHERE id IN {value}"
