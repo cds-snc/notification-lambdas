@@ -11,10 +11,10 @@ data_sources:
     # caching settings
     # can greatly improve speed
     # off by default
-    # cache:
-    #   mode: slow # or all
-    #   expires_in: 60 # min
-    #   slow_threshold: 15 # sec, only used in slow mode
+    cache:
+      mode: slow # or all
+      expires_in: 15 # min
+      slow_threshold: 15 # sec, only used in slow mode
 
     # wrap queries in a transaction for safety
     # not necessary if you use a read-only user
@@ -25,9 +25,11 @@ data_sources:
       # zone_id: "SELECT id, name FROM zones ORDER BY name ASC"
       # period: ["day", "week", "month"]
       # status: {0: "Active", 1: "Archived"}
+      priority: ["priority", "normal", "bulk"]
 
     linked_columns:
       # user_id: "/admin/users/{value}"
+      service_id: "<%= ENV['NOTIFY_URL'] || 'https://notification.canada.ca' %>/services/{value}"
 
     smart_columns:
       # user_id: "SELECT id, name FROM users WHERE id IN {value}"
