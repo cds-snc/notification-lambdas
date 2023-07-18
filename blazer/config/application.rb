@@ -48,7 +48,7 @@ module BlazerSolo
     config.action_mailer.default_url_options = {
       :host => ENV["MAILER_DEFAULT_HOST"] || "localhost:8080"
     }
-  
+
     if ENV["RAILS_LOG_TO_STDOUT"] != "disabled"
       logger = ActiveSupport::Logger.new($stdout)
       logger.formatter = proc do |severity, datetime, progname, msg|
