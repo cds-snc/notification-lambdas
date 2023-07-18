@@ -46,7 +46,7 @@ module BlazerSolo
     config.secret_key_base = ENV["SECRET_KEY_BASE"] || SecureRandom.hex(30)
     config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"] != "disabled"
     config.action_mailer.default_url_options = {
-      : host => ENV["MAILER_DEFAULT_HOST"] || "localhost:8080"
+      :host => ENV["MAILER_DEFAULT_HOST"] || "localhost:8080"
     }
 
     if ENV["RAILS_LOG_TO_STDOUT"] != "disabled"
