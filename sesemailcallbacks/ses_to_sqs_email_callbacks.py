@@ -3,9 +3,12 @@ import json
 import boto3
 import uuid
 
+from botocore.client import Config
+
 
 def lambda_handler(event, context):
-    sqs = boto3.resource('sqs')
+    config = Config(connect_timeout=15, retries={'max_attempts': 3})
+    sqs = boto3.resource('sqs', config=config)
     queue = sqs.get_queue_by_name(
         QueueName='eks-notification-canada-cadelivery-receipts'
     )
