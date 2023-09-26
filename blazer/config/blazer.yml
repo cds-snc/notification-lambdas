@@ -28,8 +28,11 @@ data_sources:
       priority: ["priority", "normal", "bulk"]
 
     linked_columns:
-      # user_id: "/admin/users/{value}"
+      branding_id: "<%= ENV['NOTIFY_URL'] || 'https://notification.canada.ca' %>/email-branding/{value}"
+      organisation_id: "<%= ENV['NOTIFY_URL'] || 'https://notification.canada.ca' %>/organisations/{value}"
+      provider_id: "<%= ENV['NOTIFY_URL'] || 'https://notification.canada.ca' %>/provider/{value}" 
       service_id: "<%= ENV['NOTIFY_URL'] || 'https://notification.canada.ca' %>/services/{value}"
+      user_id: "<%= ENV['NOTIFY_URL'] || 'https://notification.canada.ca' %>/users/{value}"
 
     smart_columns:
       # user_id: "SELECT id, name FROM users WHERE id IN {value}"
