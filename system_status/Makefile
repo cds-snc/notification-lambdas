@@ -2,7 +2,7 @@
 # 	python3 cidr.py
 
 docker:
-	docker build -t notify/system-status .
+	docker build -t notify/system_status .
 
 # fmt:
 # 	black . $(ARGS)
