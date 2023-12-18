@@ -15,6 +15,7 @@ jobs:
         lambda:
           - blazer
           - google-cidr
+          - system-status
 
     steps:
       - name: Checkout
@@ -31,4 +32,7 @@ jobs:
       - name: Build Docker image
         if: steps.changes.outputs.lambda == 'true'
         working-directory: ${{ matrix.lambda }}
-        run: make docker
+        run: |
+          echo "Current working directory: $(pwd)"
+          echo "Matrix Lambda: ${{ matrix.lambda }}"
+          make docker
