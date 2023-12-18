@@ -34,14 +34,12 @@ def lambda_handler(event, context):
 
     except sqlalchemy.exc.OperationalError as e:
         logging.error("System-status lambda (db connection): {}".format(e))
-        db.dispose();
 
         return {
             'statusCode': 500
         }
     except Exception as e:
         logging.error("System-status lambda (db connection): unknown error: {}".format(e))
-        db.dispose();
 
         return {
             'statusCode': 500
@@ -54,9 +52,6 @@ def lambda_handler(event, context):
         return {
             'statusCode': 500
         }
-
-    
-    db.dispose()
 
     # check api and admin response times
     api_status = determine_site_status(URL_API, THRESHOLDS['api'])
@@ -99,6 +94,3 @@ def lambda_handler(event, context):
         },
         'statusCode': 200
     }
-
-if __name__ == '__main__':
-    pass
