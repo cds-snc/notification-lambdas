@@ -17,11 +17,11 @@ TEMPLATE_IDS = ",".join(["'{}'".format(x) for x in [template_id for notification
 
 # Build SQL query
 SQL = ("SELECT		template_id,  AVG(extract(epoch from (n.sent_at - n.created_at)))*1000  as time_to_send "
-           "FROM 		notifications n "
-           "WHERE       JOB_ID is null "
-           "AND         template_id in ({}) "
-           "AND    	    created_at >= NOW() - INTERVAL '5 MINUTES' "
-           "GROUP BY 	template_id ".format(TEMPLATE_IDS))
+        "FROM 		notifications n "
+        "WHERE      JOB_ID is null "
+        "AND        template_id in ({}) "
+        "AND    	created_at >= NOW() - INTERVAL '5 MINUTES' "
+        "GROUP BY 	template_id ".format(TEMPLATE_IDS))
 
 def lambda_handler(event, context):
     
