@@ -25,6 +25,8 @@ jobs:
             image: database-tools/blazer
           - lambda: google-cidr
             image: lambda/google-cidr
+          - lambda: system-status
+            image: lambda/system-status
 
     steps:
       - name: Checkout

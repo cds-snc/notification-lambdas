@@ -15,6 +15,7 @@ jobs:
         lambda:
           - blazer
           - google-cidr
+          - system-status
 
     steps:
       - name: Checkout
