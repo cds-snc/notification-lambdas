@@ -1,4 +1,4 @@
-# Docker image for the SNS to SQS SMS callback the lambda API.
+# Docker image for the system status lambda API.
 
 FROM public.ecr.aws/lambda/python:3.10
 
