@@ -8,18 +8,19 @@ from typing import List
 
 from notifications_python_client.errors import HTTPError
 from notifications_python_client.notifications import NotificationsAPIClient
+from notification_utils.system_status import TEMPLATES
 
 API_KEY: str = os.getenv("heartbeat_api_key", "")
 # As we can't pass in a list to env var, we pass a str and convert it.
 BASE_URL: List[str] = ast.literal_eval(os.getenv("heartbeat_base_url"))  # type: ignore
 EMAIL_ADDRESS = "success@simulator.amazonses.com"
 PHONE_NUMBER = "+14254147755" # AWS Success test number: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-sms-simulator.html
-EMAIL_BULK_TEMPLATE_ID: uuid.UUID = os.getenv("heartbeat_email_bulk_template_id") # type: ignore
-EMAIL_NORMAL_TEMPLATE_ID: uuid.UUID = os.getenv("heartbeat_email_normal_template_id") # type: ignore
-EMAIL_PRIORITY_TEMPLATE_ID: uuid.UUID = os.getenv("heartbeat_email_priority_template_id") # type: ignore
-SMS_BULK_TEMPLATE_ID: uuid.UUID = os.getenv("heartbeat_sms_bulk_template_id") # type: ignore
-SMS_NORMAL_TEMPLATE_ID: uuid.UUID = os.getenv("heartbeat_sms_normal_template_id") # type: ignore
-SMS_PRIORITY_TEMPLATE_ID: uuid.UUID = os.getenv("heartbeat_sms_priority_template_id") # type: ignore
+EMAIL_BULK_TEMPLATE_ID: uuid.UUID = TEMPLATES["email"]["low"] # type: ignore
+EMAIL_NORMAL_TEMPLATE_ID: uuid.UUID = TEMPLATES["email"]["medium"] # type: ignore
+EMAIL_PRIORITY_TEMPLATE_ID: uuid.UUID = TEMPLATES["email"]["high"] # type: ignore
+SMS_BULK_TEMPLATE_ID: uuid.UUID = TEMPLATES["sms"]["low"] # type: ignore
+SMS_NORMAL_TEMPLATE_ID: uuid.UUID = TEMPLATES["sms"]["medium"] # type: ignore
+SMS_PRIORITY_TEMPLATE_ID: uuid.UUID = TEMPLATES["sms"]["high"] # type: ignore
 
 def handler(event, context):
     if not BASE_URL:
