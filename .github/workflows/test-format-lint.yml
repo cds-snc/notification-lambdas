@@ -17,6 +17,8 @@ jobs:
             ruby: 3.0.4
           - lambda: google-cidr
             python: 3.9
+          - lambda: heartbeat
+            python: 3.10
 
     steps:
       - name: Checkout
