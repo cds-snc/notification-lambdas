@@ -18,7 +18,7 @@ EMAIL_ADDRESS = "success@simulator.amazonses.com"
 PHONE_NUMBER = "+14254147755"
 
 
-def handler(event, context): # pylint: disable=unused-argument
+def handler(event, context):  # pylint: disable=unused-argument
     """
     Parses a dict of templates from notifications_utils and
     sends Bulk, Normal and Priority Email and SMS notifications.
@@ -62,5 +62,7 @@ def handler(event, context): # pylint: disable=unused-argument
                         """
                     )
         except HTTPError as http_e:
-            print(f"Could not send heartbeat: status={http_e.status_code}, msg={http_e.message}")
+            print(
+                f"Could not send heartbeat: status={http_e.status_code}, msg={http_e.message}"
+            )
             raise
