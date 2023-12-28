@@ -3,52 +3,53 @@ Code to keep the lambda API alive.
 """
 import ast
 import os
-import uuid
 from typing import List
 
 from notifications_python_client.errors import HTTPError
 from notifications_python_client.notifications import NotificationsAPIClient
-from notification_utils.system_status import TEMPLATES
+from notifications_utils.system_status import TEMPLATES
 
 API_KEY: str = os.getenv("heartbeat_api_key", "")
 # As we can't pass in a list to env var, we pass a str and convert it.
 BASE_URL: List[str] = ast.literal_eval(os.getenv("heartbeat_base_url"))  # type: ignore
 EMAIL_ADDRESS = "success@simulator.amazonses.com"
-PHONE_NUMBER = "+14254147755" # AWS Success test number: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-sms-simulator.html
-EMAIL_BULK_TEMPLATE_ID: uuid.UUID = TEMPLATES["email"]["low"] # type: ignore
-EMAIL_NORMAL_TEMPLATE_ID: uuid.UUID = TEMPLATES["email"]["medium"] # type: ignore
-EMAIL_PRIORITY_TEMPLATE_ID: uuid.UUID = TEMPLATES["email"]["high"] # type: ignore
-SMS_BULK_TEMPLATE_ID: uuid.UUID = TEMPLATES["sms"]["low"] # type: ignore
-SMS_NORMAL_TEMPLATE_ID: uuid.UUID = TEMPLATES["sms"]["medium"] # type: ignore
-SMS_PRIORITY_TEMPLATE_ID: uuid.UUID = TEMPLATES["sms"]["high"] # type: ignore
+# AWS Success test number: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-sms-simulator.html
+PHONE_NUMBER = "+14254147755"
+
 
 def handler(event, context):
-    if not BASE_URL:
-        print("Variable BASE_URL is missing")
     if not API_KEY:
         print("Variable API_KEY is missing")
-    if not EMAIL_BULK_TEMPLATE_ID:
-        print("Variable EMAIL_BULK_TEMPLATE_ID is missing")
-    if not EMAIL_NORMAL_TEMPLATE_ID:
-        print("Variable EMAIL_NORMAL_TEMPLATE_ID is missing")
-    if not EMAIL_PRIORITY_TEMPLATE_ID:
-        print("Variable EMAIL_PRIORITY_TEMPLATE_ID is missing")
-    if not SMS_BULK_TEMPLATE_ID:
-        print("Variable SMS_BULK_TEMPLATE_ID is missing")
-    if not SMS_NORMAL_TEMPLATE_ID:
-        print("Variable SMS_NORMAL_TEMPLATE_ID is missing")
-    if not SMS_PRIORITY_TEMPLATE_ID:
-        print("Variable SMS_PRIORITY_TEMPLATE_ID is missing")
+    if not BASE_URL:
+        print("Variable BASE_URL is missing")
+
     for base_url in BASE_URL:
         notifications_client = NotificationsAPIClient(API_KEY, base_url=base_url)
         try:
-            notifications_client.send_email_notification(email_address=EMAIL_ADDRESS, template_id=EMAIL_BULK_TEMPLATE_ID)
-            notifications_client.send_email_notification(email_address=EMAIL_ADDRESS, template_id=EMAIL_NORMAL_TEMPLATE_ID)
-            notifications_client.send_email_notification(email_address=EMAIL_ADDRESS, template_id=EMAIL_PRIOIRTY_TEMPLATE_ID)
-            notifications_client.send_sms_notification(phone_nummber=PHONE_NUMBER, template_id=SMS_BULK_TEMPLATE_ID)
-            notifications_client.send_sms_notification(phone_nummber=PHONE_NUMBER, template_id=SMS_NORMAL_TEMPLATE_ID)
-            notifications_client.send_sms_notification(phone_nummber=PHONE_NUMBER, template_id=SMS_PRIOIRTY_TEMPLATE_ID)
-            print("Email has been sent by {}!".format(base_url))
+            tidy_nest = (
+                (template_type, priority, template_id)
+                for template_type, templates in TEMPLATES.items()
+                for priority, template_id in templates.items()
+            )
+
+            for template_type, priority, template_id in tidy_nest:
+                if template_type and priority and template_id:
+                    if template_type == "email":
+                        notifications_client.send_email_notification(
+                            email_address=EMAIL_ADDRESS, template_id=template_id
+                        )
+                        print(
+                            f"{template_type.capitalize()} has been sent by {base_url}!"
+                        )
+                    elif template_type == "sms":
+                        notifications_client.send_sms_notification(
+                            phone_number=PHONE_NUMBER, template_id=template_id
+                        )
+                        print(f"{template_type.upper()} has been sent by {base_url}!")
+                else:
+                    print(
+                        f"Required parameters missing: template_type: {template_type}, priority: {priority}, template_id: {template_id}"
+                    )
         except HTTPError as e:
             print(f"Could not send heartbeat: status={e.status_code}, msg={e.message}")
             raise
