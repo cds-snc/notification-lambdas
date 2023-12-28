@@ -23,11 +23,11 @@ from notifications_python_client.notifications import NotificationsAPIClient
             },
             {
                 "email": {
-                    "msg": "Email has been sent by {}",
+                    "msg": "Email has been sent by url1!",
                     "count": 3,
                 },
                 "sms": {
-                    "msg": "SMS has been sent by {}",
+                    "msg": "SMS has been sent by url1!",
                     "count": 3,
                 },
             },
@@ -205,4 +205,4 @@ def test_handler_template_id_presence(
     assert sms_mocked.call_count == expected["sms"]["count"]
 
     assert msg_counts[expected["sms"]["msg"]] == expected["sms"]["count"]
-    assert msg_counts[expected["sms"]["msg"]] == expected["sms"]["count"]
+    assert msg_counts[expected["email"]["msg"]] == expected["email"]["count"]
