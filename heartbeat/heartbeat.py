@@ -13,11 +13,18 @@ API_KEY: str = os.getenv("heartbeat_api_key", "")
 # As we can't pass in a list to env var, we pass a str and convert it.
 BASE_URL: List[str] = ast.literal_eval(os.getenv("heartbeat_base_url"))  # type: ignore
 EMAIL_ADDRESS = "success@simulator.amazonses.com"
-# AWS Success test number: https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-sms-simulator.html
+# AWS Success test number:
+# https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-sms-simulator.html
 PHONE_NUMBER = "+14254147755"
 
 
-def handler(event, context):
+def handler(event, context): # pylint: disable=unused-argument
+    """
+    Parses a dict of templates from notifications_utils and
+    sends Bulk, Normal and Priority Email and SMS notifications.
+    In addition to simply being a heartbeat, it provides data
+    used to determine the up/down status of Notify.
+    """
     if not API_KEY:
         print("Variable API_KEY is missing")
     if not BASE_URL:
@@ -48,8 +55,12 @@ def handler(event, context):
                         print(f"{template_type.upper()} has been sent by {base_url}!")
                 else:
                     print(
-                        f"Required parameters missing: template_type: {template_type}, priority: {priority}, template_id: {template_id}"
+                        f"""Required parameters missing:
+                        template_type: {template_type},
+                        priority: {priority},
+                        template_id: {template_id}
+                        """
                     )
-        except HTTPError as e:
-            print(f"Could not send heartbeat: status={e.status_code}, msg={e.message}")
+        except HTTPError as http_e:
+            print(f"Could not send heartbeat: status={http_e.status_code}, msg={http_e.message}")
             raise
