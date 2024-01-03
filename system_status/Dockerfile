@@ -6,6 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN yum -y install git
 
+# Add a dummy instruction to invalidate the cache
+ARG CACHEBUST=1
+RUN echo "Cachebust: $CACHEBUST"
+
 # Install the function's dependencies
 RUN ls -la
 COPY system_status/requirements_for_system_status.txt ${LAMBDA_TASK_ROOT}
