@@ -14,4 +14,4 @@ RUN python -m pip install -r requirements_for_system_status.txt
 # Copy function code
 COPY system_status.py ${LAMBDA_TASK_ROOT}
 
-CMD [ "system_status.lambda_handler" ]
+CMD [ "system_status.handler" ]
