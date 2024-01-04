@@ -15,6 +15,7 @@ jobs:
         lambda:
           - blazer
           - google-cidr
+          - heartbeat
 
     steps:
       - name: Checkout

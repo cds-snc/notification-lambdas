@@ -25,6 +25,8 @@ jobs:
             image: database-tools/blazer
           - lambda: google-cidr
             image: lambda/google-cidr
+          - lambda: heartbeat
+            image: notify/heartbeat
 
     steps:
       - name: Checkout
