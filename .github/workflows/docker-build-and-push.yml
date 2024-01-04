@@ -27,6 +27,8 @@ jobs:
             image: lambda/google-cidr
           - lambda: heartbeat
             image: notify/heartbeat
+          - lambda: system_status
+            image: notify/system_status
 
     steps:
       - name: Checkout
