@@ -15,7 +15,7 @@ BASE_URL: List[str] = ast.literal_eval(os.getenv("heartbeat_base_url"))  # type:
 EMAIL_ADDRESS = "success@simulator.amazonses.com"
 # AWS Success test number:
 # https://docs.aws.amazon.com/pinpoint/latest/userguide/channels-sms-simulator.html
-PHONE_NUMBER = "+16132532222"
+PHONE_NUMBER = os.getenv("heartbeat_sms_number", "")
 
 
 def handler(event, context):  # pylint: disable=unused-argument
