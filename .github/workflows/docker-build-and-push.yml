@@ -25,6 +25,8 @@ jobs:
             image: database-tools/blazer
           - lambda: google-cidr
             image: lambda/google-cidr
+          - lambda: heartbeat
+            image: notify/heartbeat
           - lambda: system_status
             image: notify/system_status
 
