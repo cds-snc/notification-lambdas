@@ -23,7 +23,7 @@ SQL = ("SELECT      template_id,  AVG(extract(epoch from (n.sent_at - n.created_
         "AND        created_at >= NOW() - INTERVAL '5 MINUTES' "
         "GROUP BY   template_id ".format(TEMPLATE_IDS))
 
-def lambda_handler(event, context):
+def handler(event, context):
     
     try:
         # connect to postgres db
