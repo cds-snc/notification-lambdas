@@ -97,10 +97,6 @@ jobs:
           docker push $PRODUCTION_ECR/${{ matrix.image }}:$GITHUB_SHA
           docker push $PRODUCTION_ECR/${{ matrix.image }}:latest
 
-      - name: Production ECR logout
-        if: steps.changes.outputs.lambda == 'true'
-        run: docker logout ${{ steps.production-ecr.outputs.registry }}
-
       - name: Generate docker SBOM
         if: steps.changes.outputs.lambda == 'true'
         uses: cds-snc/security-tools/.github/actions/generate-sbom@eecd7a02a0294b379411c126b61e5c29e253676a # v2.1.4
@@ -109,6 +105,10 @@ jobs:
           dockerfile_path: "${{ matrix.lambda }}/Dockerfile"
           sbom_name: "${{ matrix.lambda }}"
           token: "${{ secrets.GITHUB_TOKEN }}"        
+
+      - name: Production ECR logout
+        if: steps.changes.outputs.lambda == 'true'
+        run: docker logout ${{ steps.production-ecr.outputs.registry }}
 
       - name: my-app-install token
         id: notify-pr-bot
