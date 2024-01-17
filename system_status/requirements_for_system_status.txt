@@ -1,4 +1,4 @@
 requests==2.31.0
 SQLAlchemy==1.4.49
 psycopg2-binary==2.9.7
-git+https://github.com/cds-snc/notifier-utils.git
+git+https://github.com/cds-snc/notifier-utils.git@52.0.18#egg=notifications-utils
