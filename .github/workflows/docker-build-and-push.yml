@@ -79,8 +79,8 @@ jobs:
         run: |
           STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
           aws lambda update-function-code \
-            --function-name ${{ matrix.image }} \
-            --image-uri $STAGING_ECR/${{ matrix.image }}:latest > /dev/null 2>&1
+            --function-name ${{ matrix.lambda }} \
+            --image-uri $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA > /dev/null 2>&1
 
       - name: Publish lambda version and update alias
         run: |
