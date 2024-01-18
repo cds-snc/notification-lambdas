@@ -84,10 +84,10 @@ jobs:
 
       - name: Publish lambda version and update alias
         run: |
-          aws lambda wait function-updated --function-name ${{ matrix.image }}
-          VERSION="$(aws lambda publish-version --function-name ${{ matrix.image }} | jq -r '.Version')"
+          aws lambda wait function-updated --function-name ${{ matrix.lambda }}
+          VERSION="$(aws lambda publish-version --function-name ${{ matrix.lambda }} | jq -r '.Version')"
           aws lambda update-alias \
-            --function-name ${{ matrix.image }} \
+            --function-name ${{ matrix.lambda }} \
             --name latest \
             --function-version "$VERSION" > /dev/null 2>&1
 
