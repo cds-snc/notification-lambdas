@@ -24,8 +24,7 @@ SQL = ("SELECT      template_id,  AVG(extract(epoch from (n.sent_at - n.created_
         "GROUP BY   template_id ".format(TEMPLATE_IDS))
 
 def handler(event, context):
-    logging.basicConfig(level=logging.INFO)
-
+    logging.getLogger().setLevel('INFO')
     try:
         # connect to postgres db
         db = sqlalchemy.create_engine(DB_CONN_STRING, future=True)
