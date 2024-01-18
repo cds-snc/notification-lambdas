@@ -77,19 +77,23 @@ jobs:
       # Staging Lambda Restart
       - name: Deploy lambda
         run: |
-          STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
-          aws lambda update-function-code \
-            --function-name ${{ matrix.lambda }} \
-            --image-uri $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA > /dev/null 2>&1
+          if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
+            STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+            aws lambda update-function-code \
+              --function-name ${{ matrix.lambda }} \
+              --image-uri $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA > /dev/null 2>&1
+          fi
 
       - name: Publish lambda version and update alias
         run: |
-          aws lambda wait function-updated --function-name ${{ matrix.lambda }}
-          VERSION="$(aws lambda publish-version --function-name ${{ matrix.lambda }} | jq -r '.Version')"
-          aws lambda update-alias \
-            --function-name ${{ matrix.lambda }} \
-            --name latest \
-            --function-version "$VERSION" > /dev/null 2>&1
+          if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
+            aws lambda wait function-updated --function-name ${{ matrix.lambda }}
+            VERSION="$(aws lambda publish-version --function-name ${{ matrix.lambda }} | jq -r '.Version')"
+            aws lambda update-alias \
+              --function-name ${{ matrix.lambda }} \
+              --name latest \
+              --function-version "$VERSION" > /dev/null 2>&1
+          fi
 
       # Production image push
       - name: Production AWS credentials
