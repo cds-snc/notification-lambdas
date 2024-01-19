@@ -65,9 +65,9 @@ jobs:
         if: steps.changes.outputs.lambda == 'true'
         run: |
           STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
-          docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:latest
-          docker push $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker push $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           docker push $STAGING_ECR/${{ matrix.image }}:latest
 
       - name: Staging ECR logout
@@ -81,7 +81,7 @@ jobs:
             STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
             aws lambda update-function-code \
               --function-name ${{ matrix.lambda }} \
-              --image-uri $STAGING_ECR/${{ matrix.image }}:$GITHUB_SHA > /dev/null 2>&1
+              --image-uri $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7} > /dev/null 2>&1
           fi
 
       - name: Publish lambda version and update alias
@@ -113,9 +113,9 @@ jobs:
         if: steps.changes.outputs.lambda == 'true'
         run: |
           PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
-          docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:latest
-          docker push $PRODUCTION_ECR/${{ matrix.image }}:$GITHUB_SHA
+          docker push $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           docker push $PRODUCTION_ECR/${{ matrix.image }}:latest
 
       - name: Generate docker SBOM
@@ -137,7 +137,9 @@ jobs:
         with:
           app_id: ${{ secrets.NOTIFY_PR_BOT_APP_ID }}
           private_key: ${{ secrets.NOTIFY_PR_BOT_PRIVATE_KEY }}
+        if: ${{ matrix.lambda != 'blazer' }}
 
       - uses: cds-snc/notification-pr-bot@main
         env:
           TOKEN: ${{ steps.notify-pr-bot.outputs.token }}
+        if: ${{ matrix.lambda != 'blazer' }}
