@@ -131,15 +131,15 @@ jobs:
         if: steps.changes.outputs.lambda == 'true'
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
 
-      # - name: my-app-install token
-      #   id: notify-pr-bot
-      #   uses: getsentry/action-github-app-token@38a3ce582e170ddfe8789f509597c6944f2292a9 # v1.0.6
-      #   with:
-      #     app_id: ${{ secrets.NOTIFY_PR_BOT_APP_ID }}
-      #     private_key: ${{ secrets.NOTIFY_PR_BOT_PRIVATE_KEY }}
-      #   if: ${{ matrix.lambda != 'blazer' }}
+      - name: my-app-install token
+        id: notify-pr-bot
+        uses: getsentry/action-github-app-token@38a3ce582e170ddfe8789f509597c6944f2292a9 # v1.0.6
+        with:
+          app_id: ${{ secrets.NOTIFY_PR_BOT_APP_ID }}
+          private_key: ${{ secrets.NOTIFY_PR_BOT_PRIVATE_KEY }}
+        if: ${{ matrix.lambda != 'blazer' }}
 
-      # - uses: cds-snc/notification-pr-bot@main
-      #   env:
-      #     TOKEN: ${{ steps.notify-pr-bot.outputs.token }}
-      #   if: ${{ matrix.lambda != 'blazer' }}
+      - uses: cds-snc/notification-pr-bot@main
+        env:
+          TOKEN: ${{ steps.notify-pr-bot.outputs.token }}
+        if: ${{ matrix.lambda != 'blazer' }}
