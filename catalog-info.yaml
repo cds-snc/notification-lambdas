@@ -2,10 +2,14 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: notification-lambdas
+  title: Notification Lambdas
   description: Repo that holds all of notify's lambdas
+  annotations:
+    github.com/project-slug: cds-snc/notification-lambdas
   labels:
     license: MIT
 spec:
-  type: website
-  lifecycle: experimental
-  owner: cds-snc
+  type: service
+  lifecycle: production
+  owner: group:cds-snc/notify-dev
+  system: gc-notification
