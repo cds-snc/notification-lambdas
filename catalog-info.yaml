@@ -1,5 +1,5 @@
 apiVersion: backstage.io/v1alpha1
-kind: Resource
+kind: Component
 metadata:
   name: notification-lambdas
   title: Notification Lambdas
@@ -9,7 +9,7 @@ metadata:
   labels:
     license: MIT
 spec:
-  type: lambda
+  type: service
   lifecycle: production
   owner: group:cds-snc/notify-dev
   system: gc-notification
