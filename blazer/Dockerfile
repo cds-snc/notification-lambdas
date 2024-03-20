@@ -1,4 +1,4 @@
-FROM ruby:3.0.4-alpine3.16@sha256:d5c7b1207fdfc7a39125c2a33929b974077f6cd1dfdaaca3750d114e5febf32e
+FROM ruby:3.2.2-alpine3.16@sha256:8022d9a6f819976abf37747f44d8cc7e806bc2b111bac0aa7f846a1d1f6519da
 
 LABEL Author="Andrew Kane <andrew@ankane.org>"
 
