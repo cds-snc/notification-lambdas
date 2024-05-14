@@ -1,0 +1,32 @@
+name: Run System Status Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11
+
+    - name: Print working directory
+      run: pwd
+
+    - name: Install dependencies
+      run: |
+        cd system_status
+        python -m pip install --upgrade pip
+        pip install -r requirements_for_system_status.txt
+
+    - name: Run tests
+      run: |
+        cd system_status
+        pytest -v tests/*
