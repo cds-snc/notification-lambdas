@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import sqlalchemy
+from botocore.exceptions import ClientError
 
 from database_queries import (
     low_template_result_group1,
@@ -103,36 +104,39 @@ def handler(event, context):
     logging.info("Admin status: {}".format(admin_status))
 
     # Section 4: Push statuses to s3 bucket
-    s3_client = boto3.client("s3")
-    bucket_name = BUCKET_NAME
-    object_key = "response.json"
-    status_data = [
-        {"id": "api", "status": api_status},
-        {"id": "admin", "status": admin_status},
-        {"id": "email", "status": email_status},
-        {"id": "sms", "status": sms_status},
-    ]
-    s3_client.put_object(
-        Body=json.dumps(status_data), Bucket=bucket_name, Key=object_key
-    )
-
-    logging.info(
-        "Pushed status data to s3: {}".format(
-            {
+    try:
+        s3_client = boto3.client("s3")
+        bucket_name = BUCKET_NAME
+        object_key = "response.json"
+        status_data = [
+            {"id": "api", "status": api_status},
+            {"id": "admin", "status": admin_status},
+            {"id": "email", "status": email_status},
+            {"id": "sms", "status": sms_status},
+        ]
+        s3_client.put_object(
+            Body=json.dumps(status_data), Bucket=bucket_name, Key=object_key
+        )
+    except ClientError as e:
+        logging.error("Error uploading status data to s3: {}".format(e))
+    else:
+        logging.info(
+            "Pushed status data to s3: {}".format(
+                {
+                    "api": api_status,
+                    "admin": admin_status,
+                    "email": email_status,
+                    "sms": sms_status,
+                }
+            )
+        )
+    finally:
+        return {
+            "body": {
                 "api": api_status,
                 "admin": admin_status,
                 "email": email_status,
                 "sms": sms_status,
-            }
-        )
-    )
-
-    return {
-        "body": {
-            "api": api_status,
-            "admin": admin_status,
-            "email": email_status,
-            "sms": sms_status,
-        },
-        "statusCode": 200,
-    }
+            },
+            "statusCode": 200,
+        }

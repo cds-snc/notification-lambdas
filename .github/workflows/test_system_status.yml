@@ -17,9 +17,6 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Print working directory
-      run: pwd
-
     - name: Install dependencies
       run: |
         cd system_status

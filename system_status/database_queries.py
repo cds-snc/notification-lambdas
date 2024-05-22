@@ -3,6 +3,7 @@ import sqlalchemy
 
 from datetime import datetime, timedelta
 
+# Heartbeat Templates
 TEMPLATES = {
     "email": {
         "low": "73079cb9-c169-44ea-8cf4-8d397711cc9d",
