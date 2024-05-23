@@ -1,4 +1,8 @@
-"""Helper functions to determine the status of the database based on the results of notification statuses"""
+"""
+Helper functions to determine the status of the database based on the results of notification statuses
+Please read the README.md file for more information
+
+"""
 
 STATUS_DEFINITION = {
     "high": {

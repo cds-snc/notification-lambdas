@@ -6,25 +6,6 @@ from system_status.determine_db_status import (
     determine_medium_status,
     determine_status,
 )
-
-x = {
-    "email": {
-        "high": {"delivered"},
-        "medium1": {"delivered"},
-        "medium2": {"delivered"},
-        "low1": {"delivered"},
-        "low2": {"delivered"},
-    },
-    "sms": {
-        "high": {"delivered"},
-        "medium1": {"delivered"},
-        "medium2": {"delivered"},
-        "low1": {"delivered"},
-        "low2": {"delivered"},
-    },
-}
-
-
 class TestHighStatus:
 
     @pytest.mark.parametrize(
@@ -49,17 +30,6 @@ class TestHighStatus:
 
 
 class TestMediumStatus:
-
-    #  x =    "medium": {
-    #         "group1": {
-    #             "up": set(["sent", "delivered"]),
-    #             "down": set(["created", "permanent-failure", "technical-failure", "temporary-failure"]),
-    #         },
-    #         "group2": {
-    #             "up": set(["sending", "sent", "delivered"]),
-    #             "down": set(["created", "permanent-failure", "technical-failure", "temporary-failure"]),
-    #         },
-    #     },
 
     @pytest.mark.parametrize(
         "mediumstat1, mediumstat2, expected_result",
