@@ -1,4 +1,7 @@
 requests==2.31.0
 SQLAlchemy==1.4.49
 psycopg2-binary==2.9.7
-git+https://github.com/cds-snc/notifier-utils.git@52.0.18#egg=notifications-utils
+black==24.4.2
+pytest==8.2.0
+boto3==1.34.107
+pytest-mock==3.8.0

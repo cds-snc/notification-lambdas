@@ -4,8 +4,8 @@
 docker:
 	docker build --no-cache -t notify/system_status .
 
-# fmt:
-# 	black . $(ARGS)
+fmt:
+	black . $(ARGS)
 
 # install:
 # 	pip3 install --user -r requirements-dev.txt &&\
@@ -14,8 +14,10 @@ docker:
 # lint:
 # 	pylint cidr.py
 
+.PHONY: test
 test:
-	python3 -m pytest -s -vv
+	pip install -r requirements_for_system_status.txt
+	pytest -v tests/*
 
 .PHONY: \
 	default \
