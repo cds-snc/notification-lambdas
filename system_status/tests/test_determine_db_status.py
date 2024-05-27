@@ -6,6 +6,8 @@ from system_status.determine_db_status import (
     determine_medium_status,
     determine_status,
 )
+
+
 class TestHighStatus:
 
     @pytest.mark.parametrize(
@@ -19,7 +21,7 @@ class TestHighStatus:
             (set(["permanent-failure", "created"]), "down"),
             (
                 set(["permanent-failure", "technical-failure", "temporary-failure"]),
-                "down",
+                "degraded",
             ),
             (set(["created"]), "down"),
             (set([]), "down"),
@@ -40,6 +42,7 @@ class TestMediumStatus:
                 set(["sending", "created", "delivered"]),
                 "up",
             ),
+            (set(["technical-failure"]), set(["temporary-failure"]), "up"),
             (set(["created"]), set(["delivered"]), "up"),
             (set(["sent", "delivered"]), set(["temporary-failure"]), "up"),
             # DEGRADED
@@ -54,10 +57,9 @@ class TestMediumStatus:
             (set([]), set(["delivered"]), "down"),
             (set(["created"]), set(["created"]), "down"),
             (set(["created"]), set(["permanent-failure"]), "down"),
-            (set(["created"]), set(["technical-failure"]), "down"),
             (set(["created"]), set(["temporary-failure"]), "down"),
             (set(["permanent-failure"]), set(["permanent-failure"]), "down"),
-            (set(["permanent-failure"]), set(["technical-failure"]), "down"),
+            (set(["permanent-failure"]), set(["temporary-failure"]), "down"),
         ],
     )
     def test_medium_status(self, mediumstat1, mediumstat2, expected_result):
@@ -77,6 +79,7 @@ class TestLowStatus:
             ),
             (set(["created"]), set(["delivered"]), "up"),
             (set(["sent", "delivered"]), set(["temporary-failure"]), "up"),
+            (set(["technical-failure"]), set(["temporary-failure"]), "up"),
             # DEGRADED
             (
                 set(["sent", "delivered", "created"]),
@@ -89,10 +92,9 @@ class TestLowStatus:
             (set([]), set(["delivered"]), "down"),
             (set(["created"]), set(["created"]), "down"),
             (set(["created"]), set(["permanent-failure"]), "down"),
-            (set(["created"]), set(["technical-failure"]), "down"),
             (set(["created"]), set(["temporary-failure"]), "down"),
             (set(["permanent-failure"]), set(["permanent-failure"]), "down"),
-            (set(["permanent-failure"]), set(["technical-failure"]), "down"),
+            (set(["permanent-failure"]), set(["temporary-failure"]), "down"),
         ],
     )
     def test_low_status(self, lowstat1, lowstat2, expected_result):

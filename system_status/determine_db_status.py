@@ -7,12 +7,11 @@ Please read the README.md file for more information
 STATUS_DEFINITION = {
     "high": {
         "all": {
-            "up": set(["delivered", "sent", "sending"]),
+            "up": set(["delivered", "sent", "sending", "technical-failure"]),
             "down": set(
                 [
                     "created",
                     "permanent-failure",
-                    "technical-failure",
                     "temporary-failure",
                 ]
             ),
@@ -20,23 +19,21 @@ STATUS_DEFINITION = {
     },
     "medium": {
         "group1": {
-            "up": set(["sent", "delivered", "sending"]),
+            "up": set(["sent", "delivered", "sending", "technical-failure"]),
             "down": set(
                 [
                     "created",
                     "permanent-failure",
-                    "technical-failure",
                     "temporary-failure",
                 ]
             ),
         },
         "group2": {
-            "up": set(["sending", "sent", "delivered"]),
+            "up": set(["sending", "sent", "delivered", "technical-failure"]),
             "down": set(
                 [
                     "created",
                     "permanent-failure",
-                    "technical-failure",
                     "temporary-failure",
                 ]
             ),
@@ -44,23 +41,21 @@ STATUS_DEFINITION = {
     },
     "low": {
         "group1": {
-            "up": set(["sent", "delivered", "sending"]),
+            "up": set(["sent", "delivered", "sending", "technical-failure"]),
             "down": set(
                 [
                     "created",
                     "permanent-failure",
-                    "technical-failure",
                     "temporary-failure",
                 ]
             ),
         },
         "group2": {
-            "up": set(["sending", "sent", "delivered"]),
+            "up": set(["sending", "sent", "delivered", "technical-failure"]),
             "down": set(
                 [
                     "created",
                     "permanent-failure",
-                    "technical-failure",
                     "temporary-failure",
                 ]
             ),
