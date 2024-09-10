@@ -14,7 +14,7 @@ jobs:
       matrix:
         include:
           - lambda: blazer
-            ruby: 3.0.4
+            ruby: 3.3.1
           - lambda: google-cidr
             python: 3.9
           - lambda: heartbeat
