@@ -18,8 +18,8 @@ lint:
 	standardrb
 
 test:
-	docker-compose up -d db &&\
-	rails db:migrate &&\
+	# docker-compose up -d db &&\
+	# rails db:migrate &&\
 	rspec --format documentation
 
 .PHONY: \
