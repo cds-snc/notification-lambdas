@@ -8,7 +8,7 @@ fmt:
 	black . $(ARGS)
 
 install:
-	pip install --user -r requirements-dev.txt \
+	pip install --user -r requirements-dev.txt
 	pip install --user -r requirements.txt
 
 lint:
