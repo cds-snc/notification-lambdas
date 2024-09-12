@@ -8,13 +8,8 @@ fmt:
 	black . $(ARGS)
 
 install:
-    if [ -f requirements.txt ]; then \
-        pip install -r requirements.txt; \
-    elif [ -f Gemfile ]; then \
-        bundle install; \
-    else \
-        echo "No dependencies to install"; \
-    fi
+	pip install --user -r requirements-dev.txt
+	pip install --user -r requirements.txt
 
 lint:
 	pylint heartbeat.py
