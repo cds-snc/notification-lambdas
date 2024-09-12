@@ -48,7 +48,17 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-
+      - name: Install dependencies
+        if: steps.changes.outputs.lambda == 'true'
+        working-directory: ${{ matrix.lambda }}
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f Gemfile ]; then
+            bundle install
+          else
+            echo "No dependencies to install"
+          fi
       - name: Install deps
         if: steps.changes.outputs.lambda == 'true'
         working-directory: ${{ matrix.lambda }}
