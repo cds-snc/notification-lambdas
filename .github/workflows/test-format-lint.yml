@@ -21,7 +21,7 @@ jobs:
             python: "3.10"
 
     steps:
-      - uses: KengoTODA/actions-setup-docker-compose@d6b647df289e3f2e3db22aeb1d8868a5ae4fce5e # v1.2.2
+      - uses: KengoTODA/actions-setup-docker-compose@4677f0d86d41e623c9c6e11e1d910976da297bc0 # v1.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}            
       - name: Checkout
@@ -44,7 +44,7 @@ jobs:
 
       - name: Setup Ruby
         if: steps.changes.outputs.lambda == 'true' && matrix.ruby
-        uses: ruby/setup-ruby@943103cae7d3f1bb1e4951d5fcc7928b40e4b742 # v1.177.1
+        uses: ruby/setup-ruby@52753b7da854d5c07df37391a986c76ab4615999 # v1.191.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
