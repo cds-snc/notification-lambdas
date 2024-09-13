@@ -21,7 +21,7 @@ jobs:
             python: "3.10"
 
     steps:
-      - uses: KengoTODA/actions-setup-docker-compose@main
+      - uses: KengoTODA/actions-setup-docker-compose@d6b647df289e3f2e3db22aeb1d8868a5ae4fce5e # v1.2.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}            
       - name: Checkout
