@@ -44,7 +44,7 @@ jobs:
 
       - name: Setup Ruby
         if: steps.changes.outputs.lambda == 'true' && matrix.ruby
-        uses: ruby/setup-ruby@52753b7da854d5c07df37391a986c76ab4615999 # v1.191.0
+        uses: ruby/setup-ruby@f26937343756480a8cb3ae1f623b9c8d89ed6984 # v1.196.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
