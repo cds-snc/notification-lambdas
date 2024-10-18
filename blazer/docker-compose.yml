@@ -1,7 +1,7 @@
 version: '2'
 services:
   db:
-    image: postgres@sha256:766e8867182b474f02e48c7b1a556d12ddfa246138ddc748d70c891bf2873d82
+    image: postgres@sha256:8d3be35b184e70d81e54cbcbd3df3c0b47f37d06482c0dd1c140db5dbcc6a808
     restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
