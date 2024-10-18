@@ -125,6 +125,7 @@ jobs:
         uses: cds-snc/security-tools/.github/actions/generate-sbom@34794baf2af592913bb5b51d8df4f8d0acc49b6f # v3.2.0
         env:
           TRIVY_DB_REPOSITORY: ${{ vars.TRIVY_DB_REPOSITORY }}
+          TRIVY_JAVA_DB_REPOSITORY: ${{ vars.TRIVY_JAVA_DB_REPOSITORY }}
         with:
           docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}/${{ matrix.image }}:latest"
           dockerfile_path: "${{ matrix.lambda }}/Dockerfile"
