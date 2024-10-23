@@ -4,4 +4,4 @@
 # with package version changes made in requirements-app.txt
 
 notifications-python-client==10.0.0
-git+https://github.com/cds-snc/notification-utils.git@52.3.3#egg=notifications-utils
+git+https://github.com/cds-snc/notification-utils.git@52.3.5#egg=notifications-utils
