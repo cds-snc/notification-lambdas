@@ -3,5 +3,5 @@
 # Run `make freeze-requirements` to update requirements.txt
 # with package version changes made in requirements-app.txt
 
-notifications-python-client==10.0.0
-git+https://github.com/cds-snc/notification-utils.git@52.3.3#egg=notifications-utils
+notifications-python-client==10.0.1
+git+https://github.com/cds-snc/notification-utils.git@53.1.2#egg=notifications-utils
