@@ -1,6 +1,6 @@
 # Docker image for the system status lambda API.
 
-FROM public.ecr.aws/lambda/python:3.10
+FROM public.ecr.aws/lambda/python:3.12
 
 ENV PYTHONDONTWRITEBYTECODE 1
 
