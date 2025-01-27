@@ -4,7 +4,7 @@ FROM public.ecr.aws/lambda/python:3.12
 
 ENV PYTHONDONTWRITEBYTECODE 1
 
-RUN yum -y install git
+RUN dnf -y install git
 
 # Install the function's dependencies
 RUN ls -la
