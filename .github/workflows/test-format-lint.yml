@@ -16,7 +16,7 @@ jobs:
           - lambda: blazer
             ruby: 3.0.4
           - lambda: google-cidr
-            python: 3.9
+            python: "3.12"
           - lambda: heartbeat
             python: "3.10"
 
