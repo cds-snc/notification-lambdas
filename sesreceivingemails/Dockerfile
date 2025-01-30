@@ -1,6 +1,6 @@
 # Docker image for the SES recieving emails hitting the lambda API.
 
-FROM public.ecr.aws/lambda/python:3.9
+FROM public.ecr.aws/lambda/python:3.12
 
 ENV PYTHONDONTWRITEBYTECODE 1
 
