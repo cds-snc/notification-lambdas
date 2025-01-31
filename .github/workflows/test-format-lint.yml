@@ -18,7 +18,7 @@ jobs:
           - lambda: google-cidr
             python: 3.9
           - lambda: heartbeat
-            python: "3.10"
+            python: "3.12"
 
     steps:
       - uses: KengoTODA/actions-setup-docker-compose@4677f0d86d41e623c9c6e11e1d910976da297bc0 # v1.2.2
