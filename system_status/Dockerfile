@@ -5,6 +5,8 @@ FROM public.ecr.aws/lambda/python:3.12
 ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN dnf -y install git
+RUN dnf -y install libpq-devel
+RUN dnf -y install gcc
 
 # Install the function's dependencies
 RUN ls -la
