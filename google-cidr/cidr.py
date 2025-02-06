@@ -100,7 +100,7 @@ def get_boto_client(client_type):
     return boto3.client(client_type)
 
 
-def handler():
+def handler(event=None, context=None):  # pylint: disable=unused-argument
     """Retrieves the list of public Google service CIDR ranges"""
     google_cidrs = get_google_cidrs(IPRANGE_URLS)
 
