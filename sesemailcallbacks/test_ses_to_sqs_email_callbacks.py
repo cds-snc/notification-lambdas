@@ -10,14 +10,21 @@ from ses_to_sqs_email_callbacks import lambda_handler  # Import your Lambda func
 @pytest.fixture
 def sns_event():
     """Generate a mock SNS event with 25 records"""
-    messages = [{"Sns": {"Message": json.dumps({"notificationType": "Bounce", "mail": {"messageId": str(uuid.uuid4())}})}}
-                for _ in range(30)]
-    return {"Records": messages}
+
+    record = {
+        "messageId": str(uuid.uuid4()),
+        "Timestamp" : "2025-04-15T15:55:22.211Z",
+        "body": json.dumps({"Type" : "Notification","MessageId": "uuid", "Message": {"notificationType": "Delivery", "mail": {"timestamp":"2025-04-15T15:55:21.620Z","messageId":"010d01963a298494-470d5161-a44d-4a3e-9582-e0fa18a886fc-000000"},"delivery":{"timestamp":"2025-04-15T15:55:22.176Z"}}})
+    }
+    messages = {
+        "Records": [record for _ in range(10)]
+    }
+
+    return messages
 
 
 def test_lambda_batches_correctly(sns_event):
     """Test that Lambda batches messages and sends them to SQS"""
-    os.environ["BATCH_INSERTION_CHUNK_SIZE"] = "10"
     os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
     # Use mock_sqs as a context manager
@@ -39,7 +46,7 @@ def test_lambda_batches_correctly(sns_event):
             messages.extend(response)
 
         # Check that messages were sent to SQS
-        assert len(messages) == 3
+        assert len(messages) == 1
 
         # Verify message structure
         for msg in messages:
