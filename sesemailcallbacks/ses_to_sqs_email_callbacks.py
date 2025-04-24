@@ -13,7 +13,8 @@ def lambda_handler(event, context):
     queue = sqs.get_queue_by_name(
         QueueName='eks-notification-canada-cadelivery-receipts'
     )
-    receipt_messages = [json.loads(receipt["body"])["Message"] for receipt in event["Records"]]
+
+    receipt_messages = [json.loads(receipt["body"]) for receipt in event["Records"]]
 
     print(f"Task has begun, batch processing {len(event["Records"])} receipts.")
 
