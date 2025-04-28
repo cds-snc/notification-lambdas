@@ -14,9 +14,18 @@ def lambda_handler(event, context):
         QueueName='eks-notification-canada-cadelivery-receipts'
     )
 
-    receipt_messages = [json.loads(receipt["body"]) for receipt in event["Records"]]
+    records = event.get("Records", [])
 
-    print(f"Task has begun, batch processing {len(event["Records"])} receipts.")
+    if not records:
+        print("No SES receipt records found in the SQS event message.")
+        return {
+            "statusCode": 200
+        }
+
+    receipt_messages = [json.loads(receipt["body"]) for receipt in records]
+
+
+    print(f"Task has begun, batch processing {len(records)} receipts.")
 
     task = {
         "task": "process-ses-result",
