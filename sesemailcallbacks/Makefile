@@ -1,5 +1,5 @@
 docker:
-	docker build -t notify/sesemailcallbacks .
+	docker build -t notify/ses_to_sqs_email_callbacks .
 
 fmt:
 	black . $(ARGS)
