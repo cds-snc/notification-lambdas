@@ -1,0 +1,5 @@
+boto3==1.26.23
+botocore==1.29.23
+moto[boto3]==4.1.11
+pytest==8.3.4
+
