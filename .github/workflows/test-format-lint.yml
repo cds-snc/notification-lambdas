@@ -19,11 +19,13 @@ jobs:
             python: "3.12"
           - lambda: heartbeat
             python: "3.12"
+          - lambda: sesemailcallbacks
+            python: "3.12"
 
     steps:
       - uses: KengoTODA/actions-setup-docker-compose@4677f0d86d41e623c9c6e11e1d910976da297bc0 # v1.2.2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}            
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
