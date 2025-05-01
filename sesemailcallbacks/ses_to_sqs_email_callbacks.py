@@ -32,7 +32,7 @@ def lambda_handler(event, context):  # pylint: disable=unused-argument
         f"[batch-lambda] - Raw receipt bodies: {[receipt["body"] for receipt in records]}"
     )
     print(
-        f"[batch-lambda] - Json receipt bodies: {[json.loads(receipt["body"]) for receipt in records]}" # pylint: disable=line-too-long
+        f"[batch-lambda] - Json receipt bodies: {[json.loads(receipt["body"]) for receipt in records]}"  # pylint: disable=line-too-long
     )  # pylint: disable=line-too-long
     receipt_messages = [json.loads(receipt["body"]) for receipt in records]
 
