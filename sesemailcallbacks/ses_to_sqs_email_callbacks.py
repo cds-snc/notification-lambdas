@@ -21,9 +21,9 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200
         }
-    print(f"[BATCH] - records: {records}")
-    print(f"[BATCH] - Raw receipt bodies: {[receipt["body"] for receipt in records]}")
-    print(f"[BATCH] - Json receipt bodies: {[json.loads(receipt["body"]) for receipt in records]}")
+    print(f"[batch-lambda] - records: {records}")
+    print(f"[batch-lambda] - Raw receipt bodies: {[receipt["body"] for receipt in records]}")
+    print(f"[batch-lambda] - Json receipt bodies: {[json.loads(receipt["body"]) for receipt in records]}")
     receipt_messages = [json.loads(receipt["body"]) for receipt in records]
 
 
@@ -70,7 +70,7 @@ def lambda_handler(event, context):
             }
     }
     msg = json.dumps(envelope)
-    print(f"[BATCH] - Message to queue: {msg}")
+    print(f"[batch-lambda] - Message to queue: {msg}")
     queue.send_message(MessageBody=msg)
     print(f"{len(receipt_messages)} records have moved to call process-ses-result")
 
