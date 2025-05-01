@@ -13,8 +13,21 @@ def sns_event(num_records=10):
 
     record = {
         "messageId": str(uuid.uuid4()),
-        "Timestamp" : "2025-04-15T15:55:22.211Z",
-        "body": json.dumps({"Type" : "Notification","MessageId": "uuid", "Message": {"notificationType": "Delivery", "mail": {"timestamp":"2025-04-15T15:55:21.620Z","messageId":"010d01963a298494-470d5161-a44d-4a3e-9582-e0fa18a886fc-000000"},"delivery":{"timestamp":"2025-04-15T15:55:22.176Z"}}})
+        "Timestamp": "2025-04-15T15:55:22.211Z",
+        "body": json.dumps(
+            {
+                "Type": "Notification",
+                "MessageId": "uuid",
+                "Message": {
+                    "notificationType": "Delivery",
+                    "mail": {
+                        "timestamp": "2025-04-15T15:55:21.620Z",
+                        "messageId": "010d01963a298494-470d5161-a44d-4a3e-9582-e0fa18a886fc-000000",
+                    },
+                    "delivery": {"timestamp": "2025-04-15T15:55:22.176Z"},
+                },
+            }
+        ),
     }
     messages = {
         "Records": [record for _ in range(num_records)] if num_records > 0 else []
@@ -32,7 +45,9 @@ def test_lambda_handles_no_records():
         event = sns_event(0)
         # Create the queue before calling lambda
         sqs = boto3.resource("sqs", region_name="us-east-1")
-        queue = sqs.create_queue(QueueName="eks-notification-canada-cadelivery-receipts")
+        queue = sqs.create_queue(
+            QueueName="eks-notification-canada-cadelivery-receipts"
+        )
 
         # Call lambda handler
         response = lambda_handler(event, sqs)
@@ -54,7 +69,9 @@ def test_lambda_batches_correctly(num_records):
         event = sns_event(num_records)
         # Create the queue before calling lambda
         sqs = boto3.resource("sqs", region_name="us-east-1")
-        queue = sqs.create_queue(QueueName="eks-notification-canada-cadelivery-receipts")
+        queue = sqs.create_queue(
+            QueueName="eks-notification-canada-cadelivery-receipts"
+        )
 
         # Call lambda handler
         response = lambda_handler(event, sqs)
@@ -71,5 +88,11 @@ def test_lambda_batches_correctly(num_records):
             assert "body" in body_content
             decoded_body = json.loads(base64.b64decode(body_content["body"]))
             assert "args" in decoded_body
-            assert len(json.loads(base64.b64decode(body_content["body"]))["args"][0]["Messages"]) == num_records
-
+            assert (
+                len(
+                    json.loads(base64.b64decode(body_content["body"]))["args"][0][
+                        "Messages"
+                    ]
+                )
+                == num_records
+            )
