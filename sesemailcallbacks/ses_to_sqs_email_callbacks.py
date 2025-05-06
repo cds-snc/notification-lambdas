@@ -1,4 +1,3 @@
-import os
 import base64
 import json
 import boto3
@@ -13,45 +12,32 @@ def lambda_handler(event, context):
     queue = sqs.get_queue_by_name(
         QueueName='eks-notification-canada-cadelivery-receipts'
     )
-
-    records = event.get("Records", [])
-
-    if not records:
-        print("No SES receipt records found in the SQS event message.")
-        return {
-            "statusCode": 200
+    print("Queue {}".format(queue))
+    print("Task has begun")
+    for record in event["Records"]:
+        task = {
+            "task": "process-ses-result",
+            "id": str(uuid.uuid4()),
+            "args": [
+                {
+                    "Message": record["Sns"]["Message"]
+                }
+            ],
+            "kwargs": {},
+            "retries": 0,
+            "eta": None,
+            "expires": None,
+            "utc": True,
+            "callbacks": None,
+            "errbacks": None,
+            "timelimit": [
+                None,
+                None
+            ],
+            "taskset": None,
+            "chord": None
         }
-    print(f"[batch-lambda] - records: {records}")
-    print(f"[batch-lambda] - Raw receipt bodies: {[receipt["body"] for receipt in records]}")
-    print(f"[batch-lambda] - Json receipt bodies: {[json.loads(receipt["body"]) for receipt in records]}")
-    receipt_messages = [json.loads(receipt["body"]) for receipt in records]
-
-
-    print(f"Task has begun, batch processing {len(records)} receipts.")
-
-    task = {
-        "task": "process-ses-result",
-        "id": str(uuid.uuid4()),
-        "args": [
-            {
-                "Messages": receipt_messages
-            }
-        ],
-        "kwargs": {},
-        "retries": 0,
-        "eta": None,
-        "expires": None,
-        "utc": True,
-        "callbacks": None,
-        "errbacks": None,
-        "timelimit": [
-            None,
-            None
-        ],
-        "taskset": None,
-        "chord": None
-    }
-    envelope = {
+        envelope = {
             "body": base64.b64encode(bytes(json.dumps(task), 'utf-8')).decode("utf-8"),
             "content-encoding": "utf-8",
             "content-type": "application/json",
@@ -68,13 +54,12 @@ def lambda_handler(event, context):
                 "body_encoding": "base64",
                 "delivery_tag": str(uuid.uuid4())
             }
-    }
-    msg = json.dumps(envelope)
-    print(f"[batch-lambda] - Message to queue: {msg}")
-    queue.send_message(MessageBody=msg)
-    print(f"{len(receipt_messages)} records have moved to call process-ses-result")
-
+        }
+        msg = base64.b64encode(bytes(json.dumps(envelope), 'utf-8')).decode("utf-8")
+        queue.send_message(MessageBody=msg)
+        print("Record has moved to call process-ses-result")
     print("Task has ended")
+
 
     return {
         'statusCode': 200
