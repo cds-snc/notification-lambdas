@@ -32,10 +32,15 @@ jobs:
             folder: heartbeat
           - lambda: system_status
             image: notify/system_status
+<<<<<<< HEAD
             folder: system_status
           - lambda: ses_to_sqs_email_callbacks
             image: notify/ses_to_sqs_email_callbacks
             folder: sesemailcallbacks
+=======
+          - lambda: sesemailcallbacks
+            image: notify/ses_to_sqs_email_callbacks
+>>>>>>> 7950999 (Push the ses to sqs email callback image and lambda)
 
     steps:
       - name: Checkout
