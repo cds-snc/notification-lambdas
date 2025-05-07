@@ -1,4 +1,4 @@
-import os
+import time
 import base64
 import json
 import boto3
@@ -7,13 +7,12 @@ import uuid
 from botocore.client import Config
 
 
-def lambda_handler(event, context):
-    config = Config(connect_timeout=15, retries={'max_attempts': 3})
-    sqs = boto3.resource('sqs', config=config)
-    queue = sqs.get_queue_by_name(
-        QueueName='eks-notification-canada-cadelivery-receipts'
-    )
+config = Config(connect_timeout=15, retries={'max_attempts': 3})
+sqs = boto3.client('sqs', config=config)
+queue_url = sqs.get_queue_url(QueueName='eks-notification-canada-cadelivery-receipts')['QueueUrl']
 
+def lambda_handler(event, context):
+    start_time = time.time()
     records = event.get("Records", [])
 
     if not records:
@@ -22,11 +21,6 @@ def lambda_handler(event, context):
             "statusCode": 200
         }
     print(f"[batch-lambda] - records: {records}")
-    print(f"[batch-lambda] - Raw receipt bodies: {[receipt["body"] for receipt in records]}")
-    print(f"[batch-lambda] - Json receipt bodies: {[json.loads(receipt["body"]) for receipt in records]}")
-    receipt_messages = [json.loads(receipt["body"]) for receipt in records]
-
-
     print(f"Task has begun, batch processing {len(records)} receipts.")
 
     task = {
@@ -34,7 +28,7 @@ def lambda_handler(event, context):
         "id": str(uuid.uuid4()),
         "args": [
             {
-                "Messages": receipt_messages
+                "Messages": [receipt["body"] for receipt in records]
             }
         ],
         "kwargs": {},
@@ -71,10 +65,11 @@ def lambda_handler(event, context):
     }
     msg = json.dumps(envelope)
     print(f"[batch-lambda] - Message to queue: {msg}")
-    queue.send_message(MessageBody=msg)
-    print(f"{len(receipt_messages)} records have moved to call process-ses-result")
+    sqs.send_message(QueueUrl=queue_url, MessageBody=msg)
+    print(f"{len(records)} records have moved to call process-ses-result")
 
     print("Task has ended")
+    print(f"[batch-lambda] - Execution time: {time.time() - start_time} seconds")
 
     return {
         'statusCode': 200
