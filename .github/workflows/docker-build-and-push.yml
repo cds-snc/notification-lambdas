@@ -29,7 +29,7 @@ jobs:
             image: notify/heartbeat
           - lambda: system_status
             image: notify/system_status
-          - lambda: sesemailcallbacks
+          - lambda: ses_to_sqs_email_callbacks
             image: notify/ses_to_sqs_email_callbacks
 
     steps:
