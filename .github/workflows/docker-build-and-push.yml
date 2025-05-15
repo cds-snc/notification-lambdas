@@ -32,15 +32,10 @@ jobs:
             folder: heartbeat
           - lambda: system_status
             image: notify/system_status
-<<<<<<< HEAD
             folder: system_status
           - lambda: ses_to_sqs_email_callbacks
             image: notify/ses_to_sqs_email_callbacks
             folder: sesemailcallbacks
-=======
-          - lambda: sesemailcallbacks
-            image: notify/ses_to_sqs_email_callbacks
->>>>>>> 7950999 (Push the ses to sqs email callback image and lambda)
 
     steps:
       - name: Checkout
@@ -53,19 +48,13 @@ jobs:
             lambda:
               - '${{ matrix.lambda }}/**'
               - '.github/workflows/docker-build-and-push.yml'
-            notify_components:
-              - 'heartbeat/**'
-              - 'system_status/**'
-              - 'sesemailcallbacks/**'
-              - '.github/workflows/docker-build-and-push.yml'
 
-      # Modified condition to build all notify components if any changes
       - name: Build Docker image
         if: steps.changes.outputs.lambda == 'true'
         working-directory: ${{ matrix.folder }}
         run: make docker
 
-      # Staging image push - updated condition
+      # Staging image push
       - name: Staging AWS credentials
         if: steps.changes.outputs.lambda == 'true'
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
@@ -92,7 +81,7 @@ jobs:
         if: steps.changes.outputs.lambda == 'true'
         run: docker logout ${{ steps.staging-ecr.outputs.registry }}
 
-      # Staging Lambda Restart - updated condition
+      # Staging Lambda Restart
       - name: Deploy lambda
         if: steps.changes.outputs.lambda == 'true'
         run: |
@@ -119,7 +108,7 @@ jobs:
       - name: Production AWS credentials
         if: |
           steps.changes.outputs.lambda == 'true' ||
-          (steps.changes.outputs.notify_components == 'true' && (matrix.lambda == 'heartbeat' || matrix.lambda == 'system_status' || matrix.lambda == 'sesemailcallbacks'))
+          (steps.changes.outputs.notify_components == 'true' && (matrix.lambda == 'heartbeat' || matrix.lambda == 'system_status' || matrix.lambda == 'ses_to_sqs_email_callbacks'))
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
         with:
           role-to-assume: arn:aws:iam::${{ env.PRODUCTION_ACCOUNT_ID }}:role/notification-lambdas-apply
@@ -129,7 +118,7 @@ jobs:
       - name: Production ECR login
         if: |
           steps.changes.outputs.lambda == 'true' ||
-          (steps.changes.outputs.notify_components == 'true' && (matrix.lambda == 'heartbeat' || matrix.lambda == 'system_status' || matrix.lambda == 'sesemailcallbacks'))
+          (steps.changes.outputs.notify_components == 'true' && (matrix.lambda == 'heartbeat' || matrix.lambda == 'system_status' || matrix.lambda == 'ses_to_sqs_email_callbacks'))
         id: production-ecr
         uses: aws-actions/amazon-ecr-login@5a88a04c91d5c6f97aae0d9be790e64d9b1d47b7 # v1.7.1
 
@@ -161,7 +150,7 @@ jobs:
       - name: Production ECR logout
         if: |
           steps.changes.outputs.lambda == 'true' ||
-          (steps.changes.outputs.notify_components == 'true' && (matrix.lambda == 'heartbeat' || matrix.lambda == 'system_status' || matrix.lambda == 'sesemailcallbacks'))
+          (steps.changes.outputs.notify_components == 'true' && (matrix.lambda == 'heartbeat' || matrix.lambda == 'system_status' || matrix.lambda == 'ses_to_sqs_email_callbacks'))
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
 
       - name: my-app-install token
@@ -173,7 +162,7 @@ jobs:
         # Only run pr-bot for non-notify components or if all notify components are built
         if: |
           ${{ matrix.lambda != 'blazer' &&
-          (steps.changes.outputs.lambda == 'true' && matrix.lambda != 'heartbeat' && matrix.lambda != 'system_status' && matrix.lambda != 'sesemailcallbacks') ||
+          (steps.changes.outputs.lambda == 'true' && matrix.lambda != 'heartbeat' && matrix.lambda != 'system_status' && matrix.lambda != 'ses_to_sqs_email_callbacks') ||
           (matrix.lambda == 'heartbeat' && steps.changes.outputs.notify_components == 'true') }}
 
       - uses: cds-snc/notification-pr-bot@main
@@ -182,5 +171,5 @@ jobs:
         # Only run pr-bot for non-notify components or if all notify components are built
         if: |
           ${{ matrix.lambda != 'blazer' &&
-          (steps.changes.outputs.lambda == 'true' && matrix.lambda != 'heartbeat' && matrix.lambda != 'system_status' && matrix.lambda != 'sesemailcallbacks') ||
+          (steps.changes.outputs.lambda == 'true' && matrix.lambda != 'heartbeat' && matrix.lambda != 'system_status' && matrix.lambda != 'ses_to_sqs_email_callbacks') ||
           (matrix.lambda == 'heartbeat' && steps.changes.outputs.notify_components == 'true') }}

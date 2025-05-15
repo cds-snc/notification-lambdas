@@ -12,7 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-<<<<<<< HEAD
         include:
           - lambda: blazer
             folder: blazer
@@ -24,14 +23,6 @@ jobs:
             folder: system_status
           - lambda: ses_to_sqs_email_callbacks
             folder: sesemailcallbacks
-=======
-        lambda:
-          - blazer
-          - google-cidr
-          - heartbeat
-          - system_status
-          - sesemailcallbacks
->>>>>>> 7950999 (Push the ses to sqs email callback image and lambda)
 
     steps:
       - name: Checkout
