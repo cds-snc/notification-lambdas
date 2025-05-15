@@ -12,12 +12,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        lambda:
-          - blazer
-          - google-cidr
-          - heartbeat
-          - system_status
-          - sesemailcallbacks
+        include:
+          - lambda: blazer
+            folder: blazer
+          - lambda: google-cidr
+            folder: google-cidr
+          - lambda: heartbeat
+            folder: heartbeat
+          - lambda: system_status
+            folder: system_status
+          - lambda: ses_to_sqs_email_callbacks
+            folder: sesemailcallbacks
 
     steps:
       - name: Checkout
@@ -33,7 +38,7 @@ jobs:
 
       - name: Build Docker image
         if: steps.changes.outputs.lambda == 'true'
-        working-directory: ${{ matrix.lambda }}
+        working-directory: ${{ matrix.folder }}
         run: |
           echo "Current working directory: $(pwd)"
           echo "Matrix Lambda: ${{ matrix.lambda }}"

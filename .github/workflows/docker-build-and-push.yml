@@ -23,14 +23,19 @@ jobs:
         include:
           - lambda: blazer
             image: database-tools/blazer
+            folder: blazer
           - lambda: google-cidr
             image: lambda/google-cidr
+            folder: google-cidr
           - lambda: heartbeat
             image: notify/heartbeat
+            folder: heartbeat
           - lambda: system_status
             image: notify/system_status
-          - lambda: sesemailcallbacks
+            folder: system_status
+          - lambda: ses_to_sqs_email_callbacks
             image: notify/ses_to_sqs_email_callbacks
+            folder: sesemailcallbacks
 
     steps:
       - name: Checkout
@@ -46,7 +51,7 @@ jobs:
 
       - name: Build Docker image
         if: steps.changes.outputs.lambda == 'true'
-        working-directory: ${{ matrix.lambda }}
+        working-directory: ${{ matrix.folder }}
         run: make docker
 
       # Staging image push
@@ -130,7 +135,7 @@ jobs:
           TRIVY_JAVA_DB_REPOSITORY: ${{ vars.TRIVY_JAVA_DB_REPOSITORY }}
         with:
           docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}/${{ matrix.image }}:latest"
-          dockerfile_path: "${{ matrix.lambda }}/Dockerfile"
+          dockerfile_path: "${{ matrix.folder }}/Dockerfile"
           sbom_name: "${{ matrix.lambda }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
 
