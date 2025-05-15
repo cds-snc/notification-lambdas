@@ -17,7 +17,7 @@ jobs:
           - google-cidr
           - heartbeat
           - system_status
-          - sesemailcallbacks
+          - ses_to_sqs_email_callbacks
 
     steps:
       - name: Checkout
