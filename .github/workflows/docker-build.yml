@@ -23,6 +23,12 @@ jobs:
             folder: system_status
           - lambda: ses_to_sqs_email_callbacks
             folder: sesemailcallbacks
+          - lambda: pinpoint_to_sqs_sms_callbacks
+            folder: pinpointsmscallbacks
+          - lambda: ses_receiving_emails
+            folder: sesreceivingemails
+          - lambda: sns_to_sqs_sms_callbacks
+            folder: snssmscallbacks
 
     steps:
       - name: Checkout
@@ -35,9 +41,19 @@ jobs:
             lambda:
               - '${{ matrix.lambda }}/**'
               - '.github/workflows/docker-build.yml'
+            any_lambda:
+              - 'blazer/**'
+              - 'google-cidr/**'
+              - 'heartbeat/**'
+              - 'system_status/**'
+              - 'sesemailcallbacks/**'
+              - 'pinpointsmscallbacks/**'
+              - 'sesreceivingemails/**'
+              - 'snssmscallbacks/**'
+              - '.github/workflows/docker-build.yml'
 
       - name: Build Docker image
-        if: steps.changes.outputs.lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true'
         working-directory: ${{ matrix.folder }}
         run: |
           echo "Current working directory: $(pwd)"
