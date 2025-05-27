@@ -113,7 +113,7 @@ jobs:
 
       # Production image push
       - name: Production AWS credentials
-        if: steps.changes.outputs.lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true'
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
         with:
           role-to-assume: arn:aws:iam::${{ env.PRODUCTION_ACCOUNT_ID }}:role/notification-lambdas-apply
@@ -121,12 +121,12 @@ jobs:
           aws-region: ca-central-1
 
       - name: Production ECR login
-        if: steps.changes.outputs.lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true'
         id: production-ecr
         uses: aws-actions/amazon-ecr-login@5a88a04c91d5c6f97aae0d9be790e64d9b1d47b7 # v1.7.1
 
       - name: Production ECR push
-        if: steps.changes.outputs.lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true'
         run: |
           PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
           docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
@@ -135,7 +135,7 @@ jobs:
           docker push $PRODUCTION_ECR/${{ matrix.image }}:latest
 
       - name: Generate docker SBOM
-        if: steps.changes.outputs.lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true'
         uses: cds-snc/security-tools/.github/actions/generate-sbom@34794baf2af592913bb5b51d8df4f8d0acc49b6f # v3.2.0
         env:
           TRIVY_DB_REPOSITORY: ${{ vars.TRIVY_DB_REPOSITORY }}
@@ -147,7 +147,7 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Production ECR logout
-        if: steps.changes.outputs.lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true'
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
 
       - name: my-app-install token
@@ -156,9 +156,9 @@ jobs:
         with:
           app_id: ${{ secrets.NOTIFY_PR_BOT_APP_ID }}
           private_key: ${{ secrets.NOTIFY_PR_BOT_PRIVATE_KEY }}
-        if: ${{ matrix.lambda != 'blazer' && steps.changes.outputs.lambda == 'true' }}
+        if: ${{ matrix.lambda != 'blazer' && steps.changes.outputs.any_lambda == 'true' }}
 
       - uses: cds-snc/notification-pr-bot@main
         env:
           TOKEN: ${{ steps.notify-pr-bot.outputs.token }}
-        if: ${{ matrix.lambda != 'blazer' && steps.changes.outputs.lambda == 'true' }}
+        if: ${{ matrix.lambda != 'blazer' && steps.changes.outputs.any_lambda == 'true' }}
