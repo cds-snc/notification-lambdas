@@ -35,9 +35,16 @@ jobs:
             lambda:
               - '${{ matrix.lambda }}/**'
               - '.github/workflows/docker-build.yml'
+            any_lambda:
+              - 'blazer/**'
+              - 'google-cidr/**'
+              - 'heartbeat/**'
+              - 'system_status/**'
+              - 'sesemailcallbacks/**'
+              - '.github/workflows/docker-build.yml'
 
       - name: Build Docker image
-        if: steps.changes.outputs.lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true'
         working-directory: ${{ matrix.folder }}
         run: |
           echo "Current working directory: $(pwd)"
