@@ -23,12 +23,6 @@ jobs:
             folder: system_status
           - lambda: ses_to_sqs_email_callbacks
             folder: sesemailcallbacks
-          - lambda: pinpoint_to_sqs_sms_callbacks
-            folder: pinpointsmscallbacks
-          - lambda: ses_receiving_emails
-            folder: sesreceivingemails
-          - lambda: sns_to_sqs_sms_callbacks
-            folder: snssmscallbacks
 
     steps:
       - name: Checkout
@@ -47,9 +41,6 @@ jobs:
               - 'heartbeat/**'
               - 'system_status/**'
               - 'sesemailcallbacks/**'
-              - 'pinpointsmscallbacks/**'
-              - 'sesreceivingemails/**'
-              - 'snssmscallbacks/**'
               - '.github/workflows/docker-build.yml'
 
       - name: Build Docker image
