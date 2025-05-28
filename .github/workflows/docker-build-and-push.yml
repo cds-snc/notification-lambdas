@@ -55,6 +55,7 @@ jobs:
               - 'system_status/**'
               - 'sesemailcallbacks/**'
               - '.github/workflows/docker-build-and-push.yml'
+              - '.github/workflows/create-manifests-release-pr.yml'
 
       - name: Build Docker image
         if: steps.changes.outputs.any_lambda == 'true'
@@ -149,16 +150,3 @@ jobs:
       - name: Production ECR logout
         if: steps.changes.outputs.any_lambda == 'true'
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
-
-      - name: my-app-install token
-        id: notify-pr-bot
-        uses: getsentry/action-github-app-token@38a3ce582e170ddfe8789f509597c6944f2292a9 # v1.0.6
-        with:
-          app_id: ${{ secrets.NOTIFY_PR_BOT_APP_ID }}
-          private_key: ${{ secrets.NOTIFY_PR_BOT_PRIVATE_KEY }}
-        if: ${{ matrix.lambda != 'blazer' && steps.changes.outputs.any_lambda == 'true' }}
-
-      - uses: cds-snc/notification-pr-bot@main
-        env:
-          TOKEN: ${{ steps.notify-pr-bot.outputs.token }}
-        if: ${{ matrix.lambda != 'blazer' && steps.changes.outputs.any_lambda == 'true' }}
