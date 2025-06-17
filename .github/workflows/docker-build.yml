@@ -36,12 +36,7 @@ jobs:
               - '${{ matrix.lambda }}/**'
               - '.github/workflows/docker-build.yml'
             any_lambda:
-              - 'blazer/**'
-              - 'google-cidr/**'
-              - 'heartbeat/**'
-              - 'system_status/**'
-              - 'sesemailcallbacks/**'
-              - '.github/workflows/docker-build.yml'
+              - '**'
 
       - name: Build Docker image
         if: steps.changes.outputs.any_lambda == 'true'
