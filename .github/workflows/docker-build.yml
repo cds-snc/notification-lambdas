@@ -19,6 +19,8 @@ jobs:
             folder: google-cidr
           - lambda: heartbeat
             folder: heartbeat
+          - lambda: pinpoint_to_sqs_sms_callbacks
+            folder: pinpointsmscallbacks
           - lambda: system_status
             folder: system_status
           - lambda: ses_to_sqs_email_callbacks

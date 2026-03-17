@@ -1,0 +1,118 @@
+name: Docker image build and push us-west-2
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  ECR_SUFFIX: ".dkr.ecr.us-west-2.amazonaws.com"
+  STAGING_ACCOUNT_ID: "239043911459"
+  PRODUCTION_ACCOUNT_ID: "296255494825"
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+
+      - uses: dorny/paths-filter@7267a8516b6f92bdb098633497bad573efdbf271 # v2.12.0
+        id: changes
+        with:
+          filters: |
+            pinpoint:
+              - 'pinpointsmscallbacks/**'
+              - '.github/workflows/docker-build-and-push-us-west-2.yml'
+
+      - name: Build Docker image
+        if: steps.changes.outputs.pinpoint == 'true'
+        working-directory: pinpointsmscallbacks
+        run: make docker
+
+      - name: Staging AWS credentials
+        if: steps.changes.outputs.pinpoint == 'true'
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
+        with:
+          role-to-assume: arn:aws:iam::${{ env.STAGING_ACCOUNT_ID }}:role/notification-lambdas-apply
+          role-session-name: ECRPush
+          aws-region: us-west-2
+
+      - name: Staging ECR login
+        if: steps.changes.outputs.pinpoint == 'true'
+        id: staging-ecr
+        uses: aws-actions/amazon-ecr-login@5a88a04c91d5c6f97aae0d9be790e64d9b1d47b7 # v1.7.1
+
+      - name: Staging ECR push
+        if: steps.changes.outputs.pinpoint == 'true'
+        run: |
+          STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          docker tag notify/pinpoint_to_sqs_sms_callbacks $STAGING_ECR/notify/pinpoint_to_sqs_sms_callbacks:${GITHUB_SHA::7}
+          docker tag notify/pinpoint_to_sqs_sms_callbacks $STAGING_ECR/notify/pinpoint_to_sqs_sms_callbacks:latest
+          docker push $STAGING_ECR/notify/pinpoint_to_sqs_sms_callbacks:${GITHUB_SHA::7}
+          docker push $STAGING_ECR/notify/pinpoint_to_sqs_sms_callbacks:latest
+
+      - name: Staging ECR logout
+        if: steps.changes.outputs.pinpoint == 'true'
+        run: docker logout ${{ steps.staging-ecr.outputs.registry }}
+
+      - name: Deploy lambda
+        if: steps.changes.outputs.pinpoint == 'true'
+        run: |
+          STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          aws lambda update-function-code \
+            --function-name pinpoint_to_sqs_sms_callbacks_us_west_2 \
+            --image-uri $STAGING_ECR/notify/pinpoint_to_sqs_sms_callbacks:${GITHUB_SHA::7} > /dev/null 2>&1
+
+      - name: Publish lambda version and update alias
+        if: steps.changes.outputs.pinpoint == 'true'
+        run: |
+          aws lambda wait function-updated --function-name pinpoint_to_sqs_sms_callbacks_us_west_2
+          VERSION="$(aws lambda publish-version --function-name pinpoint_to_sqs_sms_callbacks_us_west_2 | jq -r '.Version')"
+          aws lambda update-alias \
+            --function-name pinpoint_to_sqs_sms_callbacks_us_west_2 \
+            --name latest \
+            --function-version "$VERSION" > /dev/null 2>&1
+
+      - name: Production AWS credentials
+        if: steps.changes.outputs.pinpoint == 'true'
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
+        with:
+          role-to-assume: arn:aws:iam::${{ env.PRODUCTION_ACCOUNT_ID }}:role/notification-lambdas-apply
+          role-session-name: ECRPush
+          aws-region: us-west-2
+
+      - name: Production ECR login
+        if: steps.changes.outputs.pinpoint == 'true'
+        id: production-ecr
+        uses: aws-actions/amazon-ecr-login@5a88a04c91d5c6f97aae0d9be790e64d9b1d47b7 # v1.7.1
+
+      - name: Production ECR push
+        if: steps.changes.outputs.pinpoint == 'true'
+        run: |
+          PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          docker tag notify/pinpoint_to_sqs_sms_callbacks $PRODUCTION_ECR/notify/pinpoint_to_sqs_sms_callbacks:${GITHUB_SHA::7}
+          docker tag notify/pinpoint_to_sqs_sms_callbacks $PRODUCTION_ECR/notify/pinpoint_to_sqs_sms_callbacks:latest
+          docker push $PRODUCTION_ECR/notify/pinpoint_to_sqs_sms_callbacks:${GITHUB_SHA::7}
+          docker push $PRODUCTION_ECR/notify/pinpoint_to_sqs_sms_callbacks:latest
+
+      - name: Generate docker SBOM
+        if: steps.changes.outputs.pinpoint == 'true'
+        uses: cds-snc/security-tools/.github/actions/generate-sbom@12a0cdea1c5a515dfcbe353693db804a1793c0ed # v4.0.1
+        env:
+          TRIVY_DB_REPOSITORY: ${{ vars.TRIVY_DB_REPOSITORY }}
+          TRIVY_JAVA_DB_REPOSITORY: ${{ vars.TRIVY_JAVA_DB_REPOSITORY }}
+        with:
+          docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}/notify/pinpoint_to_sqs_sms_callbacks:latest"
+          dockerfile_path: "pinpointsmscallbacks/Dockerfile"
+          sbom_name: "pinpoint_to_sqs_sms_callbacks-us-west-2"
+          token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Production ECR logout
+        if: steps.changes.outputs.pinpoint == 'true'
+        run: docker logout ${{ steps.production-ecr.outputs.registry }}
