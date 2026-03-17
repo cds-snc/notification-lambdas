@@ -4,6 +4,8 @@ import base64
 import boto3
 import uuid
 import os
+from urllib.parse import urlparse
+from botocore.exceptions import BotoCoreError, ClientError, ParamValidationError
 
 
 def to_queue(queue, message):
@@ -52,6 +54,34 @@ def to_queue(queue, message):
     queue.send_message(MessageBody=msg)
 
 
+def get_queue_url():
+    return os.environ.get("SQS_QUEUE_URL", "").strip()
+
+
+def get_sqs_resource(queue_url):
+    if queue_url:
+        hostname = urlparse(queue_url).hostname or ""
+        hostname_parts = hostname.split('.')
+
+        if len(hostname_parts) >= 4 and hostname_parts[0] == "sqs":
+            return boto3.resource('sqs', region_name=hostname_parts[1])
+
+    return boto3.resource('sqs')
+
+
+def get_queue(sqs, sqs_queue_url):
+
+    if sqs_queue_url:
+        try:
+            queue = sqs.Queue(sqs_queue_url)
+            queue.attributes
+            return queue
+        except (BotoCoreError, ClientError, ParamValidationError, ValueError) as error:
+            print(f"Falling back to default SQS queue name because SQS_QUEUE_URL is unusable: {error}")
+
+    return sqs.get_queue_by_name(QueueName="eks-notification-canada-cadelivery-receipts")
+
+
 def lambda_handler(event, context):
     cw_data = event['awslogs']['data']
     compressed_payload = base64.b64decode(cw_data)
@@ -60,8 +90,9 @@ def lambda_handler(event, context):
 
     log_events = payload['logEvents']
 
-    sqs = boto3.resource('sqs')
-    queue = sqs.get_queue_by_name(QueueName="eks-notification-canada-cadelivery-receipts")
+    sqs_queue_url = get_queue_url()
+    sqs = get_sqs_resource(sqs_queue_url)
+    queue = get_queue(sqs, sqs_queue_url)
 
     for log_event in log_events:
         print(f'LogEvent: {log_event}')
