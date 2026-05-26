@@ -2,6 +2,7 @@ import boto3
 import json
 import logging
 import os
+import requests
 import sqlalchemy
 from botocore.exceptions import ClientError
 
@@ -26,6 +27,12 @@ URL_API = os.getenv("system_status_api_url")
 URL_ADMIN = os.getenv("system_status_admin_url")
 DB_CONN_STRING = os.getenv("sqlalchemy_database_reader_uri")
 BUCKET_NAME = os.getenv("system_status_bucket_name")
+GC_ARTICLES_WAF_RATE_BYPASS_SECRET = os.getenv("gc_articles_waf_rate_bypass_secret")
+
+GC_ARTICLES_URLS = {
+    "en": "https://articles.alpha.canada.ca/notification-gc-notify/wp-json/wp/v2/pages?slug=system-status&lang=en",
+    "fr": "https://articles.alpha.canada.ca/notification-gc-notify/wp-json/wp/v2/pages?slug=etat-du-systeme&lang=fr",
+}
 
 
 def handler(event, context):
@@ -103,7 +110,27 @@ def handler(event, context):
     logging.info("API status: {}".format(api_status))
     logging.info("Admin status: {}".format(admin_status))
 
-    # Section 4: Push statuses to s3 bucket
+    # Section 4: Fetch GC Articles incident history and proxy to S3
+    articles_headers = {}
+    if GC_ARTICLES_WAF_RATE_BYPASS_SECRET:
+        articles_headers["waf-rate-bypass"] = GC_ARTICLES_WAF_RATE_BYPASS_SECRET
+
+    try:
+        s3_client = boto3.client("s3")
+        for lang, url in GC_ARTICLES_URLS.items():
+            articles_response = requests.get(url, headers=articles_headers, timeout=10)
+            s3_client.put_object(
+                Body=articles_response.content,
+                Bucket=BUCKET_NAME,
+                Key="articles-{}.json".format(lang),
+                ContentType="application/json",
+                CacheControl="max-age=60",
+            )
+            logging.info("Uploaded GC Articles content for '{}' to S3".format(lang))
+    except Exception as e:
+        logging.error("Error fetching/uploading GC Articles content: {}".format(e))
+
+    # Section 5: Push statuses to s3 bucket
     try:
         s3_client = boto3.client("s3")
         bucket_name = BUCKET_NAME
