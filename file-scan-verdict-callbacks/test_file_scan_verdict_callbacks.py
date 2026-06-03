@@ -51,8 +51,8 @@ class _Response:
 def test_lambda_handler_parses_no_threats_payload(monkeypatch):
     module = _load_module(monkeypatch)
     service_id = "11111111-1111-1111-1111-111111111111"
-    file_id = "22222222-2222-2222-2222-222222222222"
-    object_key = f"template/{service_id}/{file_id}"
+    document_id = "22222222-2222-2222-2222-222222222222"
+    object_key = f"template/{service_id}/{document_id}"
     event = _guardduty_event("COMPLETED", "NO_THREATS_FOUND", object_key)
 
     captured = {}
@@ -68,10 +68,10 @@ def test_lambda_handler_parses_no_threats_payload(monkeypatch):
 
     result = module.lambda_handler(event, None)
 
-    assert result == {"status": "ok", "file_id": file_id, "new_status": "uploaded"}
+    assert result == {"status": "ok", "document_id": document_id, "new_status": "uploaded"}
     assert (
         captured["url"]
-        == f"https://notify.example.com/service/{service_id}/files/{file_id}/status"
+        == f"https://notify.example.com/template/files/{document_id}/status"
     )
     assert captured["json"] == {"status": "uploaded"}
     assert captured["headers"]["Authorization"] == "Bearer test-secret"
@@ -81,8 +81,8 @@ def test_lambda_handler_parses_no_threats_payload(monkeypatch):
 def test_lambda_handler_parses_threats_found_payload(monkeypatch):
     module = _load_module(monkeypatch)
     service_id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-    file_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
-    object_key = f"template/{service_id}/{file_id}"
+    document_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+    object_key = f"template/{service_id}/{document_id}"
     event = _guardduty_event("COMPLETED", "THREATS_FOUND", object_key)
 
     captured = {}
@@ -100,12 +100,12 @@ def test_lambda_handler_parses_threats_found_payload(monkeypatch):
 
     assert result == {
         "status": "ok",
-        "file_id": file_id,
+        "document_id": document_id,
         "new_status": "virus_scan_failed",
     }
     assert (
         captured["url"]
-        == f"https://notify.example.com/service/{service_id}/files/{file_id}/status"
+        == f"https://notify.example.com/template/files/{document_id}/status"
     )
     assert captured["json"] == {"status": "virus_scan_failed"}
 

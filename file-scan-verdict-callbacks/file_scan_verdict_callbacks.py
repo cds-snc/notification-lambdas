@@ -46,10 +46,11 @@ def lambda_handler(event, context):
         return {"status": "skipped", "reason": "unparseable_key"}
 
     service_id = m.group("service_id")
-    file_id = m.group("document_id")
+    document_id = m.group("document_id")
     new_status = STATUS_MAP.get(scan_result, "virus_scan_failed")
 
-    url = f"{NOTIFY_API_BASE_URL}/service/{service_id}/files/{file_id}/status"
+    # Update url once the auth + endpoint routes are implemented
+    url = f"{NOTIFY_API_BASE_URL}/template/files/{document_id}/status"
     headers = {
         "Authorization": f"Bearer {SCAN_CALLBACK_SECRET}",
         "Content-Type": "application/json",
@@ -59,8 +60,8 @@ def lambda_handler(event, context):
     resp = requests.post(url, json=payload, headers=headers, timeout=10)
 
     if resp.status_code == 200:
-        print(f"Updated file {file_id} to status={new_status}")
-        return {"status": "ok", "file_id": file_id, "new_status": new_status}
+        print(f"Updated file {document_id} to status={new_status}")
+        return {"status": "ok", "document_id": document_id, "new_status": new_status}
 
     print(f"API returned {resp.status_code}: {resp.text}")
     resp.raise_for_status()  # triggers Lambda retry / DLQ
