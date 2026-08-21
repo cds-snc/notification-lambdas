@@ -14,6 +14,8 @@
 All routes are protected by Devise, so will need to sign in with Google to access Blazer.  Users that are already signed into their Google account will be automatically signed in once they've accepted the consent screen.
 
 ## Notes
+Checks use query data sources. This app includes a dedicated `checks` data source, and checks can only be created for queries that use it. Configure `BLAZER_CHECKS_DATABASE_URL` with a restricted read-only database user for tables allowed in checks. Optionally set `BLAZER_CHECKS_DATA_SOURCE_NAME` if you use a different data source name.
+
 To remove Google Sign-in and use server-side sign-in:
 
 1. Add `gem "omniauth-rails_csrf_protection"` to the [`Gemfile`](./Gemfile).
