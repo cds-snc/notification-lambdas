@@ -1,9 +1,10 @@
 source "https://rubygems.org"
 
-gem "rails", "~> 6.1.0"
-gem "blazer", "2.6.5"
+gem "rails", "~> 7.2.0"
+gem "blazer", "3.5.1"
 gem "puma"
 gem "tzinfo-data"
+gem "sprockets-rails"
 
 # data sources
 gem "pg"
@@ -13,7 +14,7 @@ gem "anomaly_detection"
 gem "prophet-rb"
 gem "trend"
 
-gem "nokogiri", ">= 1.13.9"
+gem "nokogiri"
 
 # Authentication via Devise and Google OAuth
 gem "dotenv-rails"

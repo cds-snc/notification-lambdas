@@ -4,7 +4,6 @@ worker_timeout Integer(ENV["PUMA_TIMEOUT"] || 60)
 
 preload_app!
 
-rackup DefaultRackup
 if ENV["BIND"]
   bind ENV["BIND"]
 else
