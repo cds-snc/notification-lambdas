@@ -6,6 +6,7 @@ subtracting the Google Cloud Platform CIDR ranges.
 Adapted from Google"s CIDR tool:
 https://github.com/GoogleCloudPlatform/networking-tools-python/tree/main/tools/cidr
 """
+
 import json
 import logging
 from os import environ
