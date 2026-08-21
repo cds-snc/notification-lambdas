@@ -1,4 +1,3 @@
-version: '2'
 services:
   db:
     image: postgres@sha256:766e8867182b474f02e48c7b1a556d12ddfa246138ddc748d70c891bf2873d82
