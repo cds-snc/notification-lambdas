@@ -40,7 +40,7 @@ module BlazerSolo
       end
     end
 
-    config.cache_classes = true
+    config.enable_reloading = false
     config.eager_load = true
     config.log_level = ENV["LOG_LEVEL"].present? ? ENV["LOG_LEVEL"].to_sym : :warn
     config.secret_key_base = ENV["SECRET_KEY_BASE"] || SecureRandom.hex(30)

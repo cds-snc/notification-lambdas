@@ -1,4 +1,4 @@
-FROM ruby:3.0.4-alpine3.16@sha256:d5c7b1207fdfc7a39125c2a33929b974077f6cd1dfdaaca3750d114e5febf32e
+FROM ruby:3.3-alpine
 
 LABEL Author="Andrew Kane <andrew@ankane.org>"
 
@@ -13,7 +13,7 @@ WORKDIR $INSTALL_PATH
 
 COPY . .
 
-RUN apk add --update build-base git libpq-dev mariadb-dev sqlite-dev libpq mariadb-connector-c sqlite-libs unixodbc && \
+RUN apk add --update build-base git libpq-dev mariadb-dev sqlite-dev libpq mariadb-connector-c sqlite-libs unixodbc libstdc++ && \
     gem install bundler && \
     bundle install && \
     bundle exec rails app:update:bin && \
