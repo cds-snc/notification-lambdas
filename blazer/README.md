@@ -10,6 +10,7 @@
 1. Edit the `docker-compose.yml` and change the `DATABASE_URL` and `BLAZER_DATABASE_URL` (suggestions are in file)
 1. Run `docker-compose up` and access at [http://localhost:8080](http://localhost:8080).
 1. Connect to the `web` service and run `rails db:migrate`.
+1. Merge should create a tag in manifests to deploy
 
 All routes are protected by Devise, so will need to sign in with Google to access Blazer.  Users that are already signed into their Google account will be automatically signed in once they've accepted the consent screen.
 
