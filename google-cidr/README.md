@@ -12,7 +12,6 @@ The final list of CIDR ranges is the result of `services - cloud` CIDR ranges.
 1. Create a Lambda function using the Docker image built from this directory.
 1. Create a managed prefix list that this Lambda function will update.
 1. Create a CloudWatch event rule that triggers the Lambda function once a day.
-1. Merge should create a tag in manifests to deploy
 
 ## Credits
 The code in the lambda is adapted from [Google's Cloud CIDR tool](https://github.com/GoogleCloudPlatform/networking-tools-python/tree/main/tools/cidr).
