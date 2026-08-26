@@ -18,7 +18,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
+        uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
 
@@ -30,6 +30,6 @@ jobs:
           private_key: ${{ secrets.NOTIFY_PR_BOT_PRIVATE_KEY }}
           scope: cds-snc
 
-      - uses: cds-snc/notification-pr-bot@main
+      - uses: cds-snc/notification-pr-bot@eae6c18bcfdbd9cadeb543387e3da1d524eb55f9 # main
         env:
           TOKEN: ${{ steps.notify-pr-bot.outputs.token }}
