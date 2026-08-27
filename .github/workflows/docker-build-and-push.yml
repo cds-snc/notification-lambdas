@@ -147,3 +147,21 @@ jobs:
       - name: Production ECR logout
         if: steps.changes.outputs.any_lambda == 'true'
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
+
+      - name: Notify manifests of Lambda image tag update
+        if: steps.changes.outputs.any_lambda == 'true' && !contains(fromJson('["blazer", "google-cidr"]'), matrix.lambda)
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const shortSha = '${{ github.sha }}'.substring(0, 7);
+            await github.rest.repos.createDispatchEvent({
+              owner: 'cds-snc',
+              repo: 'notification-manifests',
+              event_type: 'update-docker-image',
+              client_payload: {
+                component: '${{ matrix.lambda }}',
+                docker_tag: shortSha
+              }
+            });
+            console.log(`Dispatched update-docker-image for ${{ matrix.lambda }}:${shortSha}`)
