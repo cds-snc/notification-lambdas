@@ -4,6 +4,9 @@ data_sources:
   main:
     url: <%= ENV["BLAZER_DATABASE_URL"] || ENV["DATABASE_URL"] %>
 
+  checks:
+    url: <%= ENV["BLAZER_CHECKS_DATABASE_URL"] %>
+
     # statement timeout, in seconds
     # none by default
     # timeout: 15
