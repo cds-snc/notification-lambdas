@@ -147,3 +147,32 @@ jobs:
       - name: Production ECR logout
         if: steps.changes.outputs.any_lambda == 'true'
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
+
+  notify-manifests:
+    needs: docker-build
+    if: ${{ needs.docker-build.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtain Notify PR Bot token
+        id: notify-pr-bot
+        uses: getsentry/action-github-app-token@38a3ce582e170ddfe8789f509597c6944f2292a9 # v1.0.6
+        with:
+          app_id: ${{ secrets.NOTIFY_PR_BOT_APP_ID }}
+          private_key: ${{ secrets.NOTIFY_PR_BOT_PRIVATE_KEY }}
+          scope: cds-snc
+
+      - name: Notify manifests of Lambda image tag updates
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ steps.notify-pr-bot.outputs.token }}
+          script: |
+            const shortSha = context.sha.substring(0, 7);
+            await github.rest.repos.createDispatchEvent({
+              owner: 'cds-snc',
+              repo: 'notification-manifests',
+              event_type: 'update-lambda-image-tags',
+              client_payload: {
+                docker_tag: shortSha
+              }
+            });
+            console.log(`Dispatched update-lambda-image-tags for ${shortSha}`)
