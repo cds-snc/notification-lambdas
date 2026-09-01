@@ -24,21 +24,27 @@ jobs:
           - lambda: blazer
             image: database-tools/blazer
             folder: blazer
+            manifests_component: BLAZER
           - lambda: google-cidr
             image: lambda/google-cidr
             folder: google-cidr
+            manifests_component: GOOGLE_CIDR
           - lambda: heartbeat
             image: notify/heartbeat
             folder: heartbeat
+            manifests_component: HEARTBEAT
           - lambda: pinpoint_to_sqs_sms_callbacks
             image: notify/pinpoint_to_sqs_sms_callbacks
             folder: pinpointsmscallbacks
+            manifests_component: PINPOINT_TO_SQS_SMS_CALLBACKS
           - lambda: system_status
             image: notify/system_status
             folder: system_status
+            manifests_component: SYSTEM_STATUS
           - lambda: ses_to_sqs_email_callbacks
             image: notify/ses_to_sqs_email_callbacks
             folder: sesemailcallbacks
+            manifests_component: SES_TO_SQS_EMAIL_CALLBACKS
 
     steps:
       - name: Checkout
@@ -150,7 +156,7 @@ jobs:
 
       - name: Obtain Notify PR Bot token
         id: notify-pr-bot
-        if: steps.changes.outputs.any_lambda == 'true' && contains(fromJson('["heartbeat", "system_status", "ses_to_sqs_email_callbacks"]'), matrix.lambda)
+        if: steps.changes.outputs.any_lambda == 'true'
         uses: getsentry/action-github-app-token@38a3ce582e170ddfe8789f509597c6944f2292a9 # v1.0.6
         with:
           app_id: ${{ secrets.NOTIFY_PR_BOT_APP_ID }}
@@ -158,7 +164,7 @@ jobs:
           scope: cds-snc
 
       - name: Notify manifests of Lambda image tag update
-        if: steps.changes.outputs.any_lambda == 'true' && contains(fromJson('["heartbeat", "system_status", "ses_to_sqs_email_callbacks"]'), matrix.lambda)
+        if: steps.changes.outputs.any_lambda == 'true'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ steps.notify-pr-bot.outputs.token }}
@@ -169,8 +175,8 @@ jobs:
               repo: 'notification-manifests',
               event_type: 'update-docker-image',
               client_payload: {
-                component: '${{ matrix.lambda }}',
+                component: '${{ matrix.manifests_component }}',
                 docker_tag: shortSha
               }
             });
-            console.log(`Dispatched update-docker-image for ${{ matrix.lambda }}:${shortSha}`)
+            console.log(`Dispatched update-docker-image for ${{ matrix.manifests_component }}:${shortSha}`)
