@@ -14,6 +14,25 @@ module BlazerChecksDataSourceGuard
   end
 end
 
+module BlazerChecksExecutionGuard
+  def perform(statement, options = {})
+    result = super
+    query = options[:query]
+    return result unless query && !result.timed_out? && !result.cached? && !query.variables.any?
+
+    checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
+    return result if query.data_source == checks_data_source
+
+    query.checks.each do |check|
+      next unless check.query&.data_source == checks_data_source
+
+      check.update_state(result)
+    end
+
+    result
+  end
+end
+
 Rails.application.config.to_prepare do
   unless Blazer::Check.method_defined?(:query_must_use_checks_data_source)
     Blazer::Check.class_eval do
@@ -49,4 +68,5 @@ Rails.application.config.to_prepare do
   end
 
   Blazer.singleton_class.prepend(BlazerChecksDataSourceGuard) unless Blazer.singleton_class < BlazerChecksDataSourceGuard
+  Blazer::RunStatement.prepend(BlazerChecksExecutionGuard) unless Blazer::RunStatement < BlazerChecksExecutionGuard
 end
