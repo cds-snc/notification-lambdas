@@ -16,7 +16,6 @@ end
 
 Rails.application.config.to_prepare do
   unless Blazer::Check.method_defined?(:query_must_use_checks_data_source)
-
     Blazer::Check.class_eval do
       validate :query_must_use_checks_data_source
 
@@ -28,6 +27,23 @@ Rails.application.config.to_prepare do
         return if query.data_source == checks_data_source
 
         errors.add(:base, "Checks can only be created for queries using the #{checks_data_source} data source")
+      end
+    end
+  end
+
+  unless Blazer::Query.method_defined?(:query_with_checks_must_use_checks_data_source)
+    Blazer::Query.class_eval do
+      validate :query_with_checks_must_use_checks_data_source, if: :data_source_changed?
+
+      private
+
+      def query_with_checks_must_use_checks_data_source
+        return unless checks.exists?
+
+        checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
+        return if data_source == checks_data_source
+
+        errors.add(:base, "Queries with checks must use the #{checks_data_source} data source")
       end
     end
   end
