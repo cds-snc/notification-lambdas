@@ -17,6 +17,9 @@ end
 
 abort "No DATABASE_URL" unless ENV["DATABASE_URL"]
 
+checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
+abort "BLAZER_CHECKS_DATA_SOURCE_NAME cannot be an existing data source: #{checks_data_source}" if checks_data_source == "main"
+
 module BlazerSolo
   class Application < Rails::Application
     routes.append do
