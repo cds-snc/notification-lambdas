@@ -132,6 +132,12 @@ jobs:
           docker push $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           docker push $PRODUCTION_ECR/${{ matrix.image }}:latest
 
+      - name: Set Docker Tag
+        if: steps.changes.outputs.any_lambda == 'true'
+        run: echo "DOCKER_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+
       - name: Generate docker SBOM
         if: steps.changes.outputs.any_lambda == 'true'
         uses: cds-snc/security-tools/.github/actions/generate-sbom@d123fa2b895f7ef5b400fad333d2101b103b2e64 # v4.0.4
@@ -139,7 +145,7 @@ jobs:
           TRIVY_DB_REPOSITORY: ${{ vars.TRIVY_DB_REPOSITORY }}
           TRIVY_JAVA_DB_REPOSITORY: ${{ vars.TRIVY_JAVA_DB_REPOSITORY }}
         with:
-          docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}/${{ matrix.image }}:latest"
+          docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}/${{ matrix.image }}:${{ env.DOCKER_TAG }}"
           dockerfile_path: "${{ matrix.folder }}/Dockerfile"
           sbom_name: "${{ matrix.lambda }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
