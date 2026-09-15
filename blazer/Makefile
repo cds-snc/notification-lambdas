@@ -19,7 +19,8 @@ lint:
 
 test:
 	docker-compose up -d db &&\
-	rails db:migrate &&\
+		export BLAZER_CHECKS_DATABASE_URL="$${BLAZER_CHECKS_DATABASE_URL:-$${BLAZER_DATABASE_URL:-$${DATABASE_URL}}}" &&\
+		rails db:migrate &&\
 	rspec --format documentation
 
 .PHONY: \
