@@ -1,5 +1,12 @@
 # Restrict checks to queries that use the dedicated checks data source.
 module BlazerChecksDataSourceGuard
+  def run_check(check)
+    checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
+    return unless check.query&.data_source == checks_data_source
+
+    super
+  end
+
   def run_checks(schedule: nil)
     checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
 
@@ -32,10 +39,18 @@ Rails.application.config.to_prepare do
 
       def query_must_use_checks_data_source
         return if query.blank?
-        checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
-        return if query.data_source == checks_data_source
+        validate_check_query_data_source do
+          checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
+          return if query.data_source == checks_data_source
 
-        errors.add(:base, "Checks can only be created for queries using the #{checks_data_source} data source")
+          errors.add(:base, "Checks can only use queries configured with the #{checks_data_source} data source")
+        end
+      end
+
+      def validate_check_query_data_source
+        return yield unless query.persisted?
+
+        query.with_lock { yield }
       end
     end
   end
@@ -47,12 +62,19 @@ Rails.application.config.to_prepare do
       private
 
       def query_with_checks_must_use_checks_data_source
-        return unless checks.any?
-
         checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
-        return if data_source == checks_data_source
+        validate_checks_data_source do
+          return unless checks.any?
+          return if data_source == checks_data_source
 
-        errors.add(:base, "Queries with checks must use the #{checks_data_source} data source")
+          errors.add(:base, "Queries with checks must use the #{checks_data_source} data source")
+        end
+      end
+
+      def validate_checks_data_source
+        return yield unless persisted?
+
+        with_lock { yield }
       end
     end
   end

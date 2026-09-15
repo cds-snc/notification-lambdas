@@ -20,7 +20,7 @@ RSpec.describe "Blazer checks datasource guard" do
     check = Blazer::Check.new(query: query)
 
     expect(check.valid?).to be(false)
-    expect(check.errors[:base]).to include("Checks can only be created for queries using the checks data source")
+    expect(check.errors[:base]).to include("Checks can only use queries configured with the checks data source")
   end
 
   it "prevents a query with checks from switching away from the checks datasource" do
@@ -43,5 +43,12 @@ RSpec.describe "Blazer checks datasource guard" do
     check.update_state(result)
 
     expect(check.state).to be_nil
+  end
+
+  it "skips direct run_check calls for non-check queries" do
+    query = Blazer::Query.new(data_source: "main", statement: "SELECT 1")
+    check = Blazer::Check.new(query: query)
+
+    expect(Blazer.run_check(check)).to be_nil
   end
 end
