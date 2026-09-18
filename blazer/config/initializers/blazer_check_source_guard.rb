@@ -91,21 +91,12 @@ Rails.application.config.to_prepare do
       end
 
       def query_with_checks_must_use_checks_data_source
-        validate_checks_data_source do
-          return unless checks.any?
+        return unless checks.any?
 
-          checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
-          return if data_source == checks_data_source
+        checks_data_source = ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks")
+        return if data_source == checks_data_source
 
-          errors.add(:base, "Queries with checks must use the #{checks_data_source} data source")
-        end
-      end
-
-      # Lock this query row to avoid racing a concurrent check creation.
-      def validate_checks_data_source
-        return yield unless persisted?
-
-        with_lock { yield }
+        errors.add(:base, "Queries with checks must use the #{checks_data_source} data source")
       end
     end
   end

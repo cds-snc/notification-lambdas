@@ -34,6 +34,17 @@ RSpec.describe "Blazer checks datasource guard" do
     expect(query.errors[:base]).to include("Queries with checks must use the checks data source")
   end
 
+  it "prevents a persisted query with checks from switching datasource without raising a locking error" do
+    query = Blazer::Query.create!(data_source: "checks", name: "persisted", statement: "SELECT 1")
+    Blazer::Check.create!(query: query)
+
+    query.data_source = "main"
+
+    expect { query.valid? }.not_to raise_error
+    expect(query.valid?).to be(false)
+    expect(query.errors[:base]).to include("Queries with checks must use the checks data source")
+  end
+
   it "skips runtime evaluation for non-check queries" do
     query = Blazer::Query.new(data_source: "main", statement: "SELECT 1")
     check = Blazer::Check.new(query: query)
