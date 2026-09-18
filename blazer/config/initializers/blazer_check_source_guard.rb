@@ -32,6 +32,16 @@ module BlazerChecksExecutionGuard
   end
 end
 
+# Backward compatibility: old saved queries can have a blank datasource.
+module BlazerQueryDataSourceFallback
+  def data_source
+    value = super
+    return value if value.present?
+
+    "main"
+  end
+end
+
 Rails.application.config.to_prepare do
   unless Blazer::Check.method_defined?(:query_must_use_checks_data_source)
     Blazer::Check.class_eval do
@@ -61,9 +71,14 @@ Rails.application.config.to_prepare do
 
   unless Blazer::Query.method_defined?(:query_with_checks_must_use_checks_data_source)
     Blazer::Query.class_eval do
+      before_validation :default_data_source
       validate :query_with_checks_must_use_checks_data_source
 
       private
+
+      def default_data_source
+        self.data_source = "main" if self[:data_source].blank?
+      end
 
       def query_with_checks_must_use_checks_data_source
         validate_checks_data_source do
@@ -87,4 +102,5 @@ Rails.application.config.to_prepare do
 
   Blazer.singleton_class.prepend(BlazerChecksDataSourceGuard) unless Blazer.singleton_class < BlazerChecksDataSourceGuard
   Blazer::Check.prepend(BlazerChecksExecutionGuard) unless Blazer::Check < BlazerChecksExecutionGuard
+  Blazer::Query.prepend(BlazerQueryDataSourceFallback) unless Blazer::Query < BlazerQueryDataSourceFallback
 end

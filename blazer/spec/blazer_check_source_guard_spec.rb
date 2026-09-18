@@ -51,4 +51,16 @@ RSpec.describe "Blazer checks datasource guard" do
 
     expect(Blazer.run_check(check)).to be_nil
   end
+
+  it "defaults blank datasource values to main for legacy saved queries" do
+    query = Blazer::Query.new(statement: "SELECT 1")
+
+    expect(query.data_source).to eq("main")
+  end
+
+  it "preserves explicit datasource values" do
+    query = Blazer::Query.new(data_source: "checks", statement: "SELECT 1")
+
+    expect(query.data_source).to eq("checks")
+  end
 end
