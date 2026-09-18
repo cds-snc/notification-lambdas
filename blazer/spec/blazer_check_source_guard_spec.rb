@@ -58,6 +58,14 @@ RSpec.describe "Blazer checks datasource guard" do
     expect(query.data_source).to eq("main")
   end
 
+  it "falls back to main for persisted queries with unknown datasource values" do
+    query = Blazer::Query.new(data_source: "legacy", statement: "SELECT 1")
+    allow(query).to receive(:persisted?).and_return(true)
+    allow(Blazer).to receive(:data_sources).and_return({"main" => double("main")})
+
+    expect(query.data_source).to eq("main")
+  end
+
   it "preserves explicit datasource values" do
     query = Blazer::Query.new(data_source: "checks", statement: "SELECT 1")
 

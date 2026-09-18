@@ -32,13 +32,23 @@ module BlazerChecksExecutionGuard
   end
 end
 
-# Backward compatibility: old saved queries can have a blank datasource.
+# Backward compatibility: old saved queries can have a blank or stale datasource.
 module BlazerQueryDataSourceFallback
   def data_source
-    value = super
-    return value if value.present?
+    value = super.presence || "main"
+    return value unless persisted?
+    return value if configured_data_source?(value)
 
+    Rails.logger.warn("Blazer query #{id || "(unsaved)"} has unknown data_source=#{value.inspect}; falling back to main")
     "main"
+  end
+
+  private
+
+  def configured_data_source?(value)
+    Blazer.data_sources.key?(value)
+  rescue
+    true
   end
 end
 
