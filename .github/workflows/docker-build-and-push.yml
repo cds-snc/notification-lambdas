@@ -30,6 +30,12 @@ jobs:
           - lambda: heartbeat
             image: notify/heartbeat
             folder: heartbeat
+          - lambda: sesreceivingemails
+            image: notify/ses_receiving_emails
+            folder: sesreceivingemails
+          - lambda: snssmscallbacks
+            image: notify/sns_to_sqs_sms_callbacks
+            folder: snssmscallbacks
           - lambda: pinpoint_to_sqs_sms_callbacks
             image: notify/pinpoint_to_sqs_sms_callbacks
             folder: pinpointsmscallbacks
