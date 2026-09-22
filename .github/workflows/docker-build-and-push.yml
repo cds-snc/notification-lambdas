@@ -33,9 +33,11 @@ jobs:
           - lambda: sesreceivingemails
             image: notify/ses_receiving_emails
             folder: sesreceivingemails
+            function_name: ses_receiving_emails
           - lambda: snssmscallbacks
             image: notify/sns_to_sqs_sms_callbacks
             folder: snssmscallbacks
+            function_name: sns_to_sqs_sms_callbacks
           - lambda: pinpoint_to_sqs_sms_callbacks
             image: notify/pinpoint_to_sqs_sms_callbacks
             folder: pinpointsmscallbacks
@@ -99,7 +101,7 @@ jobs:
           if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
             STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
             aws lambda update-function-code \
-              --function-name ${{ matrix.lambda }} \
+              --function-name ${{ matrix.function_name || matrix.lambda }} \
               --image-uri $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7} > /dev/null 2>&1
           fi
 
@@ -107,10 +109,10 @@ jobs:
         if: steps.changes.outputs.any_lambda == 'true'
         run: |
           if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
-            aws lambda wait function-updated --function-name ${{ matrix.lambda }}
-            VERSION="$(aws lambda publish-version --function-name ${{ matrix.lambda }} | jq -r '.Version')"
+            aws lambda wait function-updated --function-name ${{ matrix.function_name || matrix.lambda }}
+            VERSION="$(aws lambda publish-version --function-name ${{ matrix.function_name || matrix.lambda }} | jq -r '.Version')"
             aws lambda update-alias \
-              --function-name ${{ matrix.lambda }} \
+              --function-name ${{ matrix.function_name || matrix.lambda }} \
               --name latest \
               --function-version "$VERSION" > /dev/null 2>&1
           fi
