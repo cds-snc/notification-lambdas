@@ -1,5 +1,7 @@
 include .env.example
 export $(shell sed 's/=.*//' .env.example)
+BLAZER_CHECKS_DATABASE_URL ?= $(BLAZER_DATABASE_URL)
+export BLAZER_CHECKS_DATABASE_URL
 
 default:
 	puma -C ./config/puma.rb
@@ -19,7 +21,8 @@ lint:
 
 test:
 	docker-compose up -d db &&\
-	rails db:migrate &&\
+		export BLAZER_CHECKS_DATABASE_URL="$${BLAZER_CHECKS_DATABASE_URL:-$${BLAZER_DATABASE_URL:-$${DATABASE_URL}}}" &&\
+		rails db:migrate &&\
 	rspec --format documentation
 
 .PHONY: \

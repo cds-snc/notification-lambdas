@@ -37,6 +37,9 @@ data_sources:
     smart_columns:
       # user_id: "SELECT id, name FROM users WHERE id IN {value}"
 
+  <%= ENV.fetch("BLAZER_CHECKS_DATA_SOURCE_NAME", "checks") %>:
+    url: <%= ENV.fetch("BLAZER_CHECKS_DATABASE_URL") %>
+
 # create audits
 audit: true
 
