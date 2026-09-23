@@ -34,6 +34,7 @@ jobs:
             image: notify/ses_receiving_emails
             folder: sesreceivingemails
             function_name: ses_receiving_emails
+            aws_region: us-east-1
           - lambda: snssmscallbacks
             image: notify/sns_to_sqs_sms_callbacks
             folder: snssmscallbacks
@@ -74,7 +75,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ env.STAGING_ACCOUNT_ID }}:role/notification-lambdas-apply
           role-session-name: ECRPush
-          aws-region: ca-central-1
+          aws-region: ${{ matrix.aws_region || 'ca-central-1' }}
 
       - name: Staging ECR login
         if: steps.changes.outputs.any_lambda == 'true'
@@ -84,7 +85,7 @@ jobs:
       - name: Staging ECR push
         if: steps.changes.outputs.any_lambda == 'true'
         run: |
-          STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
           docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:latest
           docker push $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
@@ -99,10 +100,10 @@ jobs:
         if: steps.changes.outputs.any_lambda == 'true'
         run: |
           if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
-            STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+            STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
             aws lambda update-function-code \
               --function-name ${{ matrix.function_name || matrix.lambda }} \
-              --image-uri $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7} > /dev/null 2>&1
+              --image-uri $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           fi
 
       - name: Publish lambda version and update alias
@@ -114,7 +115,7 @@ jobs:
             aws lambda update-alias \
               --function-name ${{ matrix.function_name || matrix.lambda }} \
               --name latest \
-              --function-version "$VERSION" > /dev/null 2>&1
+              --function-version "$VERSION"
           fi
 
       # Production image push
@@ -124,7 +125,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ env.PRODUCTION_ACCOUNT_ID }}:role/notification-lambdas-apply
           role-session-name: ECRPush
-          aws-region: ca-central-1
+          aws-region: ${{ matrix.aws_region || 'ca-central-1' }}
 
       - name: Production ECR login
         if: steps.changes.outputs.any_lambda == 'true'
@@ -134,7 +135,7 @@ jobs:
       - name: Production ECR push
         if: steps.changes.outputs.any_lambda == 'true'
         run: |
-          PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
+          PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
           docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
           docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:latest
           docker push $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
@@ -154,7 +155,7 @@ jobs:
           TRIVY_DB_REPOSITORY: ${{ vars.TRIVY_DB_REPOSITORY }}
           TRIVY_JAVA_DB_REPOSITORY: ${{ vars.TRIVY_JAVA_DB_REPOSITORY }}
         with:
-          docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}/${{ matrix.image }}:${{ steps.image-tag.outputs.tag }}"
+          docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com/${{ matrix.image }}:${{ steps.image-tag.outputs.tag }}"
           dockerfile_path: "${{ matrix.folder }}/Dockerfile"
           sbom_name: "${{ matrix.lambda }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
