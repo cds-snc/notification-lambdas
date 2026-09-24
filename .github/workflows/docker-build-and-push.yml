@@ -63,14 +63,26 @@ jobs:
             any_lambda:
               - '**'
 
+      - name: Detect empty push
+        id: empty-commit
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          parent="$(git rev-parse "${GITHUB_SHA}^1")"
+          if [[ -z "$(git diff --name-only "$parent" "$GITHUB_SHA")" ]]; then
+            echo "force_rebuild=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "force_rebuild=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build Docker image
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         working-directory: ${{ matrix.folder }}
         run: make docker
 
       # Staging image push
       - name: Staging AWS credentials
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
         with:
           role-to-assume: arn:aws:iam::${{ env.STAGING_ACCOUNT_ID }}:role/notification-lambdas-apply
@@ -78,12 +90,12 @@ jobs:
           aws-region: ${{ matrix.aws_region || 'ca-central-1' }}
 
       - name: Staging ECR login
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         id: staging-ecr
         uses: aws-actions/amazon-ecr-login@5a88a04c91d5c6f97aae0d9be790e64d9b1d47b7 # v1.7.1
 
       - name: Staging ECR push
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: |
           STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
           docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
@@ -92,12 +104,12 @@ jobs:
           docker push $STAGING_ECR/${{ matrix.image }}:latest
 
       - name: Staging ECR logout
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: docker logout ${{ steps.staging-ecr.outputs.registry }}
 
       # Staging Lambda Restart
       - name: Deploy lambda
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: |
           if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
             STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
@@ -107,7 +119,7 @@ jobs:
           fi
 
       - name: Publish lambda version and update alias
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: |
           if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
             aws lambda wait function-updated --function-name ${{ matrix.function_name || matrix.lambda }}
@@ -120,7 +132,7 @@ jobs:
 
       # Production image push
       - name: Production AWS credentials
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
         with:
           role-to-assume: arn:aws:iam::${{ env.PRODUCTION_ACCOUNT_ID }}:role/notification-lambdas-apply
@@ -128,12 +140,12 @@ jobs:
           aws-region: ${{ matrix.aws_region || 'ca-central-1' }}
 
       - name: Production ECR login
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         id: production-ecr
         uses: aws-actions/amazon-ecr-login@5a88a04c91d5c6f97aae0d9be790e64d9b1d47b7 # v1.7.1
 
       - name: Production ECR push
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: |
           PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
           docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
@@ -142,14 +154,14 @@ jobs:
           docker push $PRODUCTION_ECR/${{ matrix.image }}:latest
 
       - name: Set Docker Tag
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: echo "tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
         id: image-tag
         env:
           GITHUB_SHA: ${{ github.sha }}
 
       - name: Generate docker SBOM
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         uses: cds-snc/security-tools/.github/actions/generate-sbom@d123fa2b895f7ef5b400fad333d2101b103b2e64 # v4.0.4
         env:
           TRIVY_DB_REPOSITORY: ${{ vars.TRIVY_DB_REPOSITORY }}
@@ -161,7 +173,7 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Production ECR logout
-        if: steps.changes.outputs.any_lambda == 'true'
+        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: docker logout ${{ steps.production-ecr.outputs.registry }}
 
   notify-manifests:
