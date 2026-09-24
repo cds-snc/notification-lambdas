@@ -1,6 +1,6 @@
 requests==2.33.0
-SQLAlchemy==2.0.52
-psycopg2-binary==2.9.12
+SQLAlchemy==2.0.54
+psycopg2-binary==2.9.13
 black==25.11.0
 pytest==8.4.2
 boto3==1.42.97
