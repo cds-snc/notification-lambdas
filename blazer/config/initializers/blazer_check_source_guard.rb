@@ -22,6 +22,19 @@ module BlazerChecksDataSourceGuard
   end
 end
 
+# The blazer ECS task has no direct internet egress, so Slack notifications are
+# published to SNS instead of Blazer posting straight to hooks.slack.com.
+module BlazerSlackViaSns
+  def post(payload)
+    topic_arn = ENV["BLAZER_SLACK_SNS_TOPIC_ARN"]
+    return false if topic_arn.blank?
+
+    require "aws-sdk-sns"
+    Aws::SNS::Client.new.publish(topic_arn: topic_arn, message: payload.to_json)
+    true
+  end
+end
+
 # Defense in depth: block state updates even if run_check is reached some other way.
 module BlazerChecksExecutionGuard
   def update_state(result)
@@ -104,4 +117,5 @@ Rails.application.config.to_prepare do
   Blazer.singleton_class.prepend(BlazerChecksDataSourceGuard) unless Blazer.singleton_class < BlazerChecksDataSourceGuard
   Blazer::Check.prepend(BlazerChecksExecutionGuard) unless Blazer::Check < BlazerChecksExecutionGuard
   Blazer::Query.prepend(BlazerQueryDataSourceFallback) unless Blazer::Query < BlazerQueryDataSourceFallback
+  Blazer::SlackNotifier.singleton_class.prepend(BlazerSlackViaSns) unless Blazer::SlackNotifier.singleton_class < BlazerSlackViaSns
 end
