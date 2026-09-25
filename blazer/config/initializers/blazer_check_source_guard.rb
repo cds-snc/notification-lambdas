@@ -24,14 +24,25 @@ end
 
 # The blazer ECS task has no direct internet egress, so Slack notifications are
 # published to SNS instead of Blazer posting straight to hooks.slack.com.
+# Runs inline within the web request (e.g. "Run now"), so keep timeouts tight,
+# skip retries, and never let a delivery failure bubble up as a 500.
 module BlazerSlackViaSns
   def post(payload)
     topic_arn = ENV["BLAZER_SLACK_SNS_TOPIC_ARN"]
     return false if topic_arn.blank?
 
     require "aws-sdk-sns"
-    Aws::SNS::Client.new.publish(topic_arn: topic_arn, message: payload.to_json)
+    sns_client.publish(topic_arn: topic_arn, message: payload.to_json)
     true
+  rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
+    Rails.logger.warn("BlazerSlackViaSns failed to publish: #{e.class}: #{e.message}")
+    false
+  end
+
+  private
+
+  def sns_client
+    Aws::SNS::Client.new(http_open_timeout: 3, http_read_timeout: 5, retry_limit: 0)
   end
 end
 
