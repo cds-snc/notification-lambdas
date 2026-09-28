@@ -23,7 +23,8 @@ module BlazerChecksDataSourceGuard
 end
 
 # The blazer ECS task has no direct internet egress, so Slack notifications are
-# published to SNS instead of Blazer posting straight to hooks.slack.com.
+# published to the shared alert-general SNS topic, which already has a confirmed
+# SRE Bot subscription that forwards to Slack.
 # Runs inline within the web request (e.g. "Run now"), so keep timeouts tight,
 # skip retries, and never let a delivery failure bubble up as a 500.
 module BlazerSlackViaSns
@@ -32,7 +33,7 @@ module BlazerSlackViaSns
     return false if topic_arn.blank?
 
     require "aws-sdk-sns"
-    sns_client.publish(topic_arn: topic_arn, message: payload.to_json)
+    sns_client.publish(topic_arn: topic_arn, subject: "Blazer check", message: message_for(payload))
     true
   rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
     Rails.logger.warn("BlazerSlackViaSns failed to publish: #{e.class}: #{e.message}")
@@ -40,6 +41,14 @@ module BlazerSlackViaSns
   end
 
   private
+
+  # The subscription delivers the SNS envelope rather than raw JSON, so send
+  # readable text instead of Blazer's Slack attachment payload.
+  def message_for(payload)
+    Array(payload[:attachments]).map { |a|
+      [a[:title], a[:text], a[:title_link]].compact_blank.join("\n")
+    }.join("\n\n").presence || payload.to_json
+  end
 
   def sns_client
     Aws::SNS::Client.new(http_open_timeout: 3, http_read_timeout: 5, retry_limit: 0)
