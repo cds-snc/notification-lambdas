@@ -22,6 +22,50 @@ module BlazerChecksDataSourceGuard
   end
 end
 
+# The blazer ECS task has no direct internet egress, so Slack notifications are
+# published to the shared alert-general SNS topic, which already has a confirmed
+# SRE Bot subscription that forwards to Slack.
+# Runs inline within the web request (e.g. "Run now"), so keep timeouts tight,
+# skip retries, and never let a delivery failure bubble up as a 500.
+module BlazerSlackViaSns
+  def post(payload)
+    topic_arn = ENV["BLAZER_SLACK_SNS_TOPIC_ARN"]
+    return false if topic_arn.blank?
+
+    require "aws-sdk-sns"
+    sns_client.publish(topic_arn: topic_arn, subject: "Blazer check", message: message_for(payload))
+    true
+  rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
+    Rails.logger.warn("BlazerSlackViaSns failed to publish: #{e.class}: #{e.message}")
+    false
+  end
+
+  private
+
+  # The subscription delivers the SNS envelope rather than raw JSON, so send
+  # readable text instead of Blazer's Slack attachment payload.
+  def message_for(payload)
+    Array(payload[:attachments]).map { |a|
+      [a[:title], a[:text], a[:title_link]].compact_blank.join("\n")
+    }.join("\n\n").presence || payload.to_json
+  end
+
+  def sns_client
+    Aws::SNS::Client.new(http_open_timeout: 3, http_read_timeout: 5, retry_limit: 0)
+  end
+end
+
+# SNS routing is per-topic, not per-check, so notifications shouldn't depend on
+# Blazer.slack? (which is only true for the webhook/oauth integrations) or on a
+# check having a slack_channels value filled in.
+module BlazerSlackChannelsViaSns
+  def split_slack_channels(check)
+    return ["sns"] if ENV["BLAZER_SLACK_SNS_TOPIC_ARN"].present?
+
+    super
+  end
+end
+
 # Defense in depth: block state updates even if run_check is reached some other way.
 module BlazerChecksExecutionGuard
   def update_state(result)
@@ -104,4 +148,6 @@ Rails.application.config.to_prepare do
   Blazer.singleton_class.prepend(BlazerChecksDataSourceGuard) unless Blazer.singleton_class < BlazerChecksDataSourceGuard
   Blazer::Check.prepend(BlazerChecksExecutionGuard) unless Blazer::Check < BlazerChecksExecutionGuard
   Blazer::Query.prepend(BlazerQueryDataSourceFallback) unless Blazer::Query < BlazerQueryDataSourceFallback
+  Blazer::SlackNotifier.singleton_class.prepend(BlazerSlackViaSns) unless Blazer::SlackNotifier.singleton_class < BlazerSlackViaSns
+  Blazer::SlackNotifier.singleton_class.prepend(BlazerSlackChannelsViaSns) unless Blazer::SlackNotifier.singleton_class < BlazerSlackChannelsViaSns
 end

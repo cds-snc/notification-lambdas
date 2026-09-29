@@ -82,4 +82,42 @@ RSpec.describe "Blazer checks datasource guard" do
 
     expect(query.data_source).to eq("checks")
   end
+
+  describe "Slack notifications via SNS" do
+    around do |example|
+      original = ENV["BLAZER_SLACK_SNS_TOPIC_ARN"]
+      ENV["BLAZER_SLACK_SNS_TOPIC_ARN"] = "arn:aws:sns:ca-central-1:123456789012:alert-general"
+      example.run
+    ensure
+      if original.nil?
+        ENV.delete("BLAZER_SLACK_SNS_TOPIC_ARN")
+      else
+        ENV["BLAZER_SLACK_SNS_TOPIC_ARN"] = original
+      end
+    end
+
+    it "still routes checks with no slack_channels set, since routing is per-topic" do
+      check = Blazer::Check.new(slack_channels: nil)
+
+      expect(Blazer::SlackNotifier.split_slack_channels(check)).to eq(["sns"])
+    end
+
+    it "publishes to the configured SNS topic instead of posting to Slack directly" do
+      sns_client = instance_double(Aws::SNS::Client, publish: nil)
+      allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
+
+      result = Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])
+
+      expect(sns_client).to have_received(:publish).with(hash_including(topic_arn: ENV["BLAZER_SLACK_SNS_TOPIC_ARN"]))
+      expect(result).to be(true)
+    end
+
+    it "does not raise and returns false when SNS publish fails" do
+      sns_client = instance_double(Aws::SNS::Client)
+      allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
+      allow(sns_client).to receive(:publish).and_raise(Aws::SNS::Errors::ServiceError.new(nil, "boom"))
+
+      expect(Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])).to be(false)
+    end
+  end
 end

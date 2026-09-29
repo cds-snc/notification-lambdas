@@ -9,6 +9,9 @@ gem "sprockets-rails"
 # data sources
 gem "pg"
 
+# publish Blazer's Slack notifications via SNS (ECS task has no direct internet egress)
+gem "aws-sdk-sns"
+
 # anomaly detection and forecasting
 gem "anomaly_detection"
 gem "prophet-rb"
