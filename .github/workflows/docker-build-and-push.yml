@@ -42,6 +42,11 @@ jobs:
           - lambda: pinpoint_to_sqs_sms_callbacks
             image: notify/pinpoint_to_sqs_sms_callbacks
             folder: pinpointsmscallbacks
+          - lambda: pinpoint_to_sqs_sms_callbacks_us_west_2
+            image: notify/pinpoint_to_sqs_sms_callbacks
+            folder: pinpointsmscallbacks
+            function_name: pinpoint_to_sqs_sms_callbacks_us_west_2
+            aws_region: us-west-2
           - lambda: system_status
             image: notify/system_status
             folder: system_status
