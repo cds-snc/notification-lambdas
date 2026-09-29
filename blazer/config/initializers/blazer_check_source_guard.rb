@@ -30,10 +30,14 @@ end
 module BlazerSlackViaSns
   def post(payload)
     topic_arn = ENV["BLAZER_SLACK_SNS_TOPIC_ARN"]
-    return false if topic_arn.blank?
+    if topic_arn.blank?
+      Rails.logger.warn("BlazerSlackViaSns skipped: BLAZER_SLACK_SNS_TOPIC_ARN is not set")
+      return false
+    end
 
     require "aws-sdk-sns"
-    sns_client.publish(topic_arn: topic_arn, subject: "Blazer check", message: message_for(payload))
+    response = sns_client.publish(topic_arn: topic_arn, subject: "Blazer check", message: message_for(payload))
+    Rails.logger.info("BlazerSlackViaSns published message_id=#{response.message_id} topic_arn=#{topic_arn}")
     true
   rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
     Rails.logger.warn("BlazerSlackViaSns failed to publish: #{e.class}: #{e.message}")
