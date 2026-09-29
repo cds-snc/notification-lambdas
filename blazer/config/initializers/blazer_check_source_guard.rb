@@ -42,6 +42,10 @@ module BlazerSlackViaSns
   rescue Aws::Errors::ServiceError, Seahorse::Client::NetworkingError => e
     Rails.logger.warn("BlazerSlackViaSns failed to publish: #{e.class}: #{e.message}")
     false
+  rescue => e
+    # Catch-all so an unanticipated error class can't fail silently under Safely.safely.
+    Rails.logger.error("BlazerSlackViaSns unexpected error: #{e.class}: #{e.message}")
+    false
   end
 
   private

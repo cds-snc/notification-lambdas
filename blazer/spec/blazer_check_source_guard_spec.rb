@@ -119,5 +119,13 @@ RSpec.describe "Blazer checks datasource guard" do
 
       expect(Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])).to be(false)
     end
+
+    it "does not raise and returns false for an unanticipated error class" do
+      sns_client = instance_double(Aws::SNS::Client)
+      allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
+      allow(sns_client).to receive(:publish).and_raise(ArgumentError, "unexpected")
+
+      expect(Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])).to be(false)
+    end
   end
 end
