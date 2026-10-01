@@ -114,29 +114,6 @@ jobs:
         if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         run: docker logout ${{ steps.staging-ecr.outputs.registry }}
 
-      # Staging Lambda Restart
-      - name: Deploy lambda
-        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
-        run: |
-          if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
-            STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
-            aws lambda update-function-code \
-              --function-name ${{ matrix.function_name || matrix.lambda }} \
-              --image-uri $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
-          fi
-
-      - name: Publish lambda version and update alias
-        if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
-        run: |
-          if [[ "${{ matrix.image }}" != "database-tools/blazer" ]]; then
-            aws lambda wait function-updated --function-name ${{ matrix.function_name || matrix.lambda }}
-            VERSION="$(aws lambda publish-version --function-name ${{ matrix.function_name || matrix.lambda }} | jq -r '.Version')"
-            aws lambda update-alias \
-              --function-name ${{ matrix.function_name || matrix.lambda }} \
-              --name latest \
-              --function-version "$VERSION"
-          fi
-
       # Production image push
       - name: Production AWS credentials
         if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'

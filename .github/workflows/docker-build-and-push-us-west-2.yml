@@ -61,24 +61,6 @@ jobs:
         if: steps.changes.outputs.pinpoint == 'true'
         run: docker logout ${{ steps.staging-ecr.outputs.registry }}
 
-      - name: Deploy lambda
-        if: steps.changes.outputs.pinpoint == 'true'
-        run: |
-          STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}${{ env.ECR_SUFFIX }}"
-          aws lambda update-function-code \
-            --function-name pinpoint_to_sqs_sms_callbacks_us_west_2 \
-            --image-uri $STAGING_ECR/notify/pinpoint_to_sqs_sms_callbacks:${GITHUB_SHA::7} > /dev/null 2>&1
-
-      - name: Publish lambda version and update alias
-        if: steps.changes.outputs.pinpoint == 'true'
-        run: |
-          aws lambda wait function-updated --function-name pinpoint_to_sqs_sms_callbacks_us_west_2
-          VERSION="$(aws lambda publish-version --function-name pinpoint_to_sqs_sms_callbacks_us_west_2 | jq -r '.Version')"
-          aws lambda update-alias \
-            --function-name pinpoint_to_sqs_sms_callbacks_us_west_2 \
-            --name latest \
-            --function-version "$VERSION" > /dev/null 2>&1
-
       - name: Production AWS credentials
         if: steps.changes.outputs.pinpoint == 'true'
         uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # tag=v1.7.0
