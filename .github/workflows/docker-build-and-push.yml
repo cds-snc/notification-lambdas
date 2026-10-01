@@ -189,3 +189,13 @@ jobs:
               }
             });
             console.log(`Dispatched update-lambda-image-tags for ${shortSha}`)
+
+  notify-slack:
+    needs: [docker-build, notify-manifests]
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack channel if this workflow failed
+        run: |
+          json='{"text":"<!here> Lambda image build/publish is failing <https://github.com/cds-snc/notification-lambdas/actions|notification-lambdas Actions> !"}'
+          curl --fail -X POST -H 'Content-type: application/json' --data "$json" "${{ secrets.SLACK_WEBHOOK }}"
