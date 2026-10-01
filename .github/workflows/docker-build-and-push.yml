@@ -47,6 +47,7 @@ jobs:
             folder: pinpointsmscallbacks
             function_name: pinpoint_to_sqs_sms_callbacks_us_west_2
             aws_region: us-west-2
+            sbom_name: pinpoint_to_sqs_sms_callbacks-us-west-2
           - lambda: system_status
             image: notify/system_status
             folder: system_status
@@ -153,7 +154,7 @@ jobs:
         with:
           docker_image: "${{ env.PRODUCTION_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com/${{ matrix.image }}:${{ steps.image-tag.outputs.tag }}"
           dockerfile_path: "${{ matrix.folder }}/Dockerfile"
-          sbom_name: "${{ matrix.lambda }}"
+          sbom_name: "${{ matrix.sbom_name || matrix.lambda }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Production ECR logout
