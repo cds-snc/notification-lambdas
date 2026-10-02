@@ -27,6 +27,8 @@ end
 # SRE Bot subscription that forwards to Slack.
 # Runs inline within the web request (e.g. "Run now"), so keep timeouts tight,
 # skip retries, and never let a delivery failure bubble up as a 500.
+BLAZER_SNS_SOURCE = "blazer"
+
 module BlazerSlackViaSns
   def post(payload)
     topic_arn = ENV["BLAZER_SLACK_SNS_TOPIC_ARN"]
@@ -50,9 +52,11 @@ module BlazerSlackViaSns
 
   private
 
-  # The subscription delivers the SNS envelope rather than raw JSON, so send
-  # readable text instead of Blazer's Slack attachment payload.
+  # SRE Bot's blazer_check handler reads our structured form (source: "blazer");
+  # anything else (e.g. channel_failing_checks) falls back to flattened text.
   def message_for(payload)
+    return payload.to_json if payload[:source] == BLAZER_SNS_SOURCE
+
     Array(payload[:attachments]).map { |a|
       [a[:title], a[:text], a[:title_link]].compact_blank.join("\n")
     }.join("\n\n").presence || payload.to_json
@@ -60,6 +64,25 @@ module BlazerSlackViaSns
 
   def sns_client
     Aws::SNS::Client.new(http_open_timeout: 3, http_read_timeout: 5, retry_limit: 0)
+  end
+end
+
+# SRE Bot's blazer_check handler can render a query description alongside the
+# state change, which Blazer's own Slack attachments never carry.
+module BlazerSlackStructuredPayloadViaSns
+  def state_change(check:, state:, state_was:, result:, message:, check_type:)
+    return super if ENV["BLAZER_SLACK_SNS_TOPIC_ARN"].blank?
+
+    payload = {
+      source: BLAZER_SNS_SOURCE,
+      query_name: check.query&.name,
+      state: state,
+      query_url: query_url(check.query_id),
+      description: check.query&.description,
+      message: message
+    }.compact
+
+    post(payload)
   end
 end
 
@@ -158,4 +181,5 @@ Rails.application.config.to_prepare do
   Blazer::Query.prepend(BlazerQueryDataSourceFallback) unless Blazer::Query < BlazerQueryDataSourceFallback
   Blazer::SlackNotifier.singleton_class.prepend(BlazerSlackViaSns) unless Blazer::SlackNotifier.singleton_class < BlazerSlackViaSns
   Blazer::SlackNotifier.singleton_class.prepend(BlazerSlackChannelsViaSns) unless Blazer::SlackNotifier.singleton_class < BlazerSlackChannelsViaSns
+  Blazer::SlackNotifier.singleton_class.prepend(BlazerSlackStructuredPayloadViaSns) unless Blazer::SlackNotifier.singleton_class < BlazerSlackStructuredPayloadViaSns
 end

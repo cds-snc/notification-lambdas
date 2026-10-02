@@ -127,5 +127,27 @@ RSpec.describe "Blazer checks datasource guard" do
 
       expect(Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])).to be(false)
     end
+
+    it "publishes the structured payload SRE Bot expects, including the query description" do
+      query = Blazer::Query.create!(data_source: "checks", name: "tester", statement: "SELECT 1", description: "Explains what this check guards against")
+      check = Blazer::Check.create!(query: query)
+      result = instance_double(Blazer::Result, rows: [])
+
+      sns_client = instance_double(Aws::SNS::Client, publish: instance_double(Aws::SNS::Types::PublishResponse, message_id: "test-message-id"))
+      allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
+
+      Blazer::SlackNotifier.state_change(check: check, state: "failing", state_was: "passing", result: result, message: nil, check_type: "missing_data")
+
+      expect(sns_client).to have_received(:publish) do |args|
+        message = JSON.parse(args[:message])
+        expect(message).to include(
+          "source" => "blazer",
+          "query_name" => "tester",
+          "state" => "failing",
+          "description" => "Explains what this check guards against"
+        )
+        expect(message["query_url"]).to include(query.id.to_s)
+      end
+    end
   end
 end
