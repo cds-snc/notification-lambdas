@@ -103,7 +103,7 @@ RSpec.describe "Blazer checks datasource guard" do
     end
 
     it "publishes to the configured SNS topic instead of posting to Slack directly" do
-      sns_client = instance_double(Aws::SNS::Client, publish: nil)
+      sns_client = instance_double(Aws::SNS::Client, publish: instance_double(Aws::SNS::Types::PublishResponse, message_id: "test-message-id"))
       allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
 
       result = Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])
@@ -116,6 +116,14 @@ RSpec.describe "Blazer checks datasource guard" do
       sns_client = instance_double(Aws::SNS::Client)
       allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
       allow(sns_client).to receive(:publish).and_raise(Aws::SNS::Errors::ServiceError.new(nil, "boom"))
+
+      expect(Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])).to be(false)
+    end
+
+    it "does not raise and returns false for an unanticipated error class" do
+      sns_client = instance_double(Aws::SNS::Client)
+      allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
+      allow(sns_client).to receive(:publish).and_raise(ArgumentError, "unexpected")
 
       expect(Blazer::SlackNotifier.post(attachments: [{title: "Check Failing", text: "boom"}])).to be(false)
     end
