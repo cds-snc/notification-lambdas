@@ -12,6 +12,9 @@ gem "pg"
 # publish Blazer's Slack notifications via SNS (ECS task has no direct internet egress)
 gem "aws-sdk-sns"
 
+# parse/evaluate arbitrary cron expressions for per-check scheduling
+gem "fugit"
+
 # anomaly detection and forecasting
 gem "anomaly_detection"
 gem "prophet-rb"
