@@ -17,41 +17,47 @@ TEMPLATES = {
     },
 }
 
-TIMING = {
-    "high": {
-        "all": {
-            "timing": datetime.now() - timedelta(seconds=60),
-        }
-    },
-    "medium": {
-        "group1": {
-            "timing": [
-                datetime.now() - timedelta(minutes=52),
-                datetime.now() - timedelta(minutes=47),
-            ],
+def build_timing(reference_time=None):
+    """
+    Build heartbeat query windows for a single invocation.
+    """
+    now = reference_time or datetime.now()
+
+    return {
+        "high": {
+            "all": {
+                "timing": now - timedelta(seconds=60),
+            }
         },
-        "group2": {
-            "timing": [
-                datetime.now() - timedelta(minutes=42),
-                datetime.now() - timedelta(minutes=37),
-            ],
+        "medium": {
+            "group1": {
+                "timing": [
+                    now - timedelta(minutes=52),
+                    now - timedelta(minutes=47),
+                ],
+            },
+            "group2": {
+                "timing": [
+                    now - timedelta(minutes=42),
+                    now - timedelta(minutes=37),
+                ],
+            },
         },
-    },
-    "low": {
-        "group1": {
-            "timing": [
-                datetime.now() - timedelta(hours=3, minutes=7),
-                datetime.now() - timedelta(hours=3, minutes=2),
-            ],
+        "low": {
+            "group1": {
+                "timing": [
+                    now - timedelta(hours=3, minutes=7),
+                    now - timedelta(hours=3, minutes=2),
+                ],
+            },
+            "group2": {
+                "timing": [
+                    now - timedelta(minutes=20),
+                    now - timedelta(minutes=15),
+                ],
+            },
         },
-        "group2": {
-            "timing": [
-                datetime.now() - timedelta(minutes=20),
-                datetime.now() - timedelta(minutes=15),
-            ],
-        },
-    },
-}
+    }
 
 
 def build_sql_query(template_ids: list, created_at_min, created_at_max=None) -> str:
@@ -86,13 +92,13 @@ def formatted_result(result, email_template_id, sms_template_id):
     return final
 
 
-def high_template_result(connection):
+def high_template_result(connection, timing):
     """
     Data from the database: is in the format: [(UUID('xx'), ['delivered']), (UUID('xx'), ['delivered'])]
     """
     sql = build_sql_query(
         (TEMPLATES["email"]["high"], TEMPLATES["sms"]["high"]),
-        TIMING["high"]["all"]["timing"],
+        timing["high"]["all"]["timing"],
     )
     result = connection.execute(sqlalchemy.sql.text(sql)).fetchall()
     return formatted_result(
@@ -100,11 +106,11 @@ def high_template_result(connection):
     )
 
 
-def medium_template_result_group1(connection):
+def medium_template_result_group1(connection, timing):
     sql = build_sql_query(
         (TEMPLATES["email"]["medium"], TEMPLATES["sms"]["medium"]),
-        TIMING["medium"]["group1"]["timing"][0],
-        TIMING["medium"]["group1"]["timing"][1],
+        timing["medium"]["group1"]["timing"][0],
+        timing["medium"]["group1"]["timing"][1],
     )
     result = connection.execute(sqlalchemy.sql.text(sql)).fetchall()
     return formatted_result(
@@ -112,11 +118,11 @@ def medium_template_result_group1(connection):
     )
 
 
-def medium_template_result_group2(connection):
+def medium_template_result_group2(connection, timing):
     sql = build_sql_query(
         (TEMPLATES["email"]["medium"], TEMPLATES["sms"]["medium"]),
-        TIMING["medium"]["group2"]["timing"][0],
-        TIMING["medium"]["group2"]["timing"][1],
+        timing["medium"]["group2"]["timing"][0],
+        timing["medium"]["group2"]["timing"][1],
     )
     result = connection.execute(sqlalchemy.sql.text(sql)).fetchall()
     return formatted_result(
@@ -124,21 +130,21 @@ def medium_template_result_group2(connection):
     )
 
 
-def low_template_result_group1(connection):
+def low_template_result_group1(connection, timing):
     sql = build_sql_query(
         (TEMPLATES["email"]["low"], TEMPLATES["sms"]["low"]),
-        TIMING["low"]["group1"]["timing"][0],
-        TIMING["low"]["group1"]["timing"][1],
+        timing["low"]["group1"]["timing"][0],
+        timing["low"]["group1"]["timing"][1],
     )
     result = connection.execute(sqlalchemy.sql.text(sql)).fetchall()
     return formatted_result(result, TEMPLATES["email"]["low"], TEMPLATES["sms"]["low"])
 
 
-def low_template_result_group2(connection):
+def low_template_result_group2(connection, timing):
     sql = build_sql_query(
         (TEMPLATES["email"]["low"], TEMPLATES["sms"]["low"]),
-        TIMING["low"]["group2"]["timing"][0],
-        TIMING["low"]["group2"]["timing"][1],
+        timing["low"]["group2"]["timing"][0],
+        timing["low"]["group2"]["timing"][1],
     )
     result = connection.execute(sqlalchemy.sql.text(sql)).fetchall()
     return formatted_result(result, TEMPLATES["email"]["low"], TEMPLATES["sms"]["low"])

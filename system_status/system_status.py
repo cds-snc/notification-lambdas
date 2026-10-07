@@ -7,6 +7,7 @@ import sqlalchemy
 from botocore.exceptions import ClientError
 
 from database_queries import (
+    build_timing,
     low_template_result_group1,
     low_template_result_group2,
     medium_template_result_group1,
@@ -44,12 +45,13 @@ def handler(event, context):
         # connect to postgres db
         db = sqlalchemy.create_engine(DB_CONN_STRING, future=True)
         logging.info("connected to db")
+        timing = build_timing()
         with db.connect() as conn:
-            high = high_template_result(conn)
-            medium1 = medium_template_result_group1(conn)
-            medium2 = medium_template_result_group2(conn)
-            low1 = low_template_result_group1(conn)
-            low2 = low_template_result_group2(conn)
+            high = high_template_result(conn, timing)
+            medium1 = medium_template_result_group1(conn, timing)
+            medium2 = medium_template_result_group2(conn, timing)
+            low1 = low_template_result_group1(conn, timing)
+            low2 = low_template_result_group2(conn, timing)
             email_data = {
                 "high": high["email"]["status"] if "email" in high else {},
                 "medium1": medium1["email"]["status"] if "email" in medium1 else {},
