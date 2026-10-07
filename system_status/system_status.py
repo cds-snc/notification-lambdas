@@ -36,6 +36,31 @@ GC_ARTICLES_URLS = {
 }
 
 
+def _timing_windows_for_logs(timing):
+    return {
+        "high": {
+            "from": timing["high"]["all"]["timing"].isoformat(),
+            "to": "now",
+        },
+        "medium1": {
+            "from": timing["medium"]["group1"]["timing"][0].isoformat(),
+            "to": timing["medium"]["group1"]["timing"][1].isoformat(),
+        },
+        "medium2": {
+            "from": timing["medium"]["group2"]["timing"][0].isoformat(),
+            "to": timing["medium"]["group2"]["timing"][1].isoformat(),
+        },
+        "low1": {
+            "from": timing["low"]["group1"]["timing"][0].isoformat(),
+            "to": timing["low"]["group1"]["timing"][1].isoformat(),
+        },
+        "low2": {
+            "from": timing["low"]["group2"]["timing"][0].isoformat(),
+            "to": timing["low"]["group2"]["timing"][1].isoformat(),
+        },
+    }
+
+
 def handler(event, context):
     logging.info("Starting system-status lambda")
     logging.info("Received event: {}".format(event))
@@ -46,6 +71,11 @@ def handler(event, context):
         db = sqlalchemy.create_engine(DB_CONN_STRING, future=True)
         logging.info("connected to db")
         timing = build_timing()
+        logging.info(
+            "Heartbeat windows for this invocation: {}".format(
+                _timing_windows_for_logs(timing)
+            )
+        )
         with db.connect() as conn:
             high = high_template_result(conn, timing)
             medium1 = medium_template_result_group1(conn, timing)
