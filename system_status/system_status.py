@@ -7,6 +7,7 @@ import sqlalchemy
 from botocore.exceptions import ClientError
 
 from database_queries import (
+    build_timing,
     low_template_result_group1,
     low_template_result_group2,
     medium_template_result_group1,
@@ -35,6 +36,31 @@ GC_ARTICLES_URLS = {
 }
 
 
+def _timing_windows_for_logs(timing):
+    return {
+        "high": {
+            "from": timing["high"]["all"]["timing"].isoformat(),
+            "to": "now",
+        },
+        "medium1": {
+            "from": timing["medium"]["group1"]["timing"][0].isoformat(),
+            "to": timing["medium"]["group1"]["timing"][1].isoformat(),
+        },
+        "medium2": {
+            "from": timing["medium"]["group2"]["timing"][0].isoformat(),
+            "to": timing["medium"]["group2"]["timing"][1].isoformat(),
+        },
+        "low1": {
+            "from": timing["low"]["group1"]["timing"][0].isoformat(),
+            "to": timing["low"]["group1"]["timing"][1].isoformat(),
+        },
+        "low2": {
+            "from": timing["low"]["group2"]["timing"][0].isoformat(),
+            "to": timing["low"]["group2"]["timing"][1].isoformat(),
+        },
+    }
+
+
 def handler(event, context):
     logging.info("Starting system-status lambda")
     logging.info("Received event: {}".format(event))
@@ -44,12 +70,18 @@ def handler(event, context):
         # connect to postgres db
         db = sqlalchemy.create_engine(DB_CONN_STRING, future=True)
         logging.info("connected to db")
+        timing = build_timing()
+        logging.info(
+            "Heartbeat windows for this invocation: {}".format(
+                _timing_windows_for_logs(timing)
+            )
+        )
         with db.connect() as conn:
-            high = high_template_result(conn)
-            medium1 = medium_template_result_group1(conn)
-            medium2 = medium_template_result_group2(conn)
-            low1 = low_template_result_group1(conn)
-            low2 = low_template_result_group2(conn)
+            high = high_template_result(conn, timing)
+            medium1 = medium_template_result_group1(conn, timing)
+            medium2 = medium_template_result_group2(conn, timing)
+            low1 = low_template_result_group1(conn, timing)
+            low2 = low_template_result_group2(conn, timing)
             email_data = {
                 "high": high["email"]["status"] if "email" in high else {},
                 "medium1": medium1["email"]["status"] if "email" in medium1 else {},
