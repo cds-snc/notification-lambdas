@@ -107,9 +107,7 @@ jobs:
         run: |
           STAGING_ECR="${{ env.STAGING_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
           docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
-          docker tag ${{ matrix.image }} $STAGING_ECR/${{ matrix.image }}:latest
           docker push $STAGING_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
-          docker push $STAGING_ECR/${{ matrix.image }}:latest
 
       - name: Staging ECR logout
         if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
@@ -134,9 +132,7 @@ jobs:
         run: |
           PRODUCTION_ECR="${{ env.PRODUCTION_ACCOUNT_ID }}.dkr.ecr.${{ matrix.aws_region || 'ca-central-1' }}.amazonaws.com"
           docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
-          docker tag ${{ matrix.image }} $PRODUCTION_ECR/${{ matrix.image }}:latest
           docker push $PRODUCTION_ECR/${{ matrix.image }}:${GITHUB_SHA::7}
-          docker push $PRODUCTION_ECR/${{ matrix.image }}:latest
 
       - name: Set Docker Tag
         if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
