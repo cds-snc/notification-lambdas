@@ -141,6 +141,21 @@ jobs:
         env:
           GITHUB_SHA: ${{ github.sha }}
 
+      # - name: Configure credentials to CDS public ECR using OIDC
+      #   if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
+      #   uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+      #   with:
+      #     role-to-assume: arn:aws:iam::283582579564:role/notification-lambdas-apply
+      #     role-session-name: NotifyLambdasGitHubActions
+      #     aws-region: "us-east-1"
+
+      # - name: Login to ECR
+      #   if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@5a88a04c91d5c6f97aae0d9be790e64d9b1d47b7 # v1.7.1
+      #   with:
+      #     registry-type: public
+
       # - name: Generate docker SBOM
       #   if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
       #   uses: cds-snc/security-tools/.github/actions/generate-sbom@d123fa2b895f7ef5b400fad333d2101b103b2e64 # v4.0.4
