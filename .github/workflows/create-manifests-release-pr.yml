@@ -11,12 +11,19 @@ permissions:
   id-token: write
   contents: write
 
+env: # temporary CA mitigation
+  NODE_OPTIONS: --use-openssl-ca
+  SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+  SSL_CERT_DIR: /etc/ssl/certs
+
 jobs:
   create-release-pr:
     runs-on: ubuntu-latest
     # Only run if the triggering workflow (docker build and push) was successful
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
+      - name: Prepare Ubuntu CA trust
+        uses: route06/actions/prepare-ubuntu-ca@aa6b218e4bc5445f54d3649a04297af5e1ce7458 # temporary CA mitigation
       - name: Checkout
         uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
         with:
