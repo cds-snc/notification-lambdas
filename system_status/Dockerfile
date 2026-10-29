@@ -1,15 +1,12 @@
 # Docker image for the system status lambda API.
 
-FROM public.ecr.aws/lambda/python:3.12
+FROM public.ecr.aws/lambda/python:3.12@sha256:3c249526505c4bf83ab74be5d4749b7705798b03effcd34c205c6a77d149c77e
 
 RUN dnf -y install ca-certificates p11-kit-trust && \
     d=/etc/pki/ca-trust/source/blocklist; [ -d $d ] || d=/etc/pki/ca-trust/source/blacklist; \
     trust extract --overwrite --format=pem-bundle \
       --filter='pkcs11:object=Comodo%20AAA%20Services%20root;type=cert' \
       $d/Comodo_AAA_Services_root.pem && \
-    trust extract --overwrite --format=pem-bundle \
-      --filter='pkcs11:object=emSign%20ECC%20Root%20CA%20-%20G3;type=cert' \
-      $d/emSign_ECC_Root_CA_-_G3.pem && \
     update-ca-trust && \
     dnf clean all
 

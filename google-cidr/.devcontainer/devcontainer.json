@@ -1,7 +1,10 @@
 {
   "name": "google-cidr",
-  "image": "mcr.microsoft.com/vscode/devcontainers/python:3.9-buster",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm@sha256:99f5250dd2d5f8b11046d5662dd94c1e3c1dae56b560c7caad5ceb7edf349046",
   "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    },
     "docker-from-docker": {
       "version": "latest",
       "moby": true,

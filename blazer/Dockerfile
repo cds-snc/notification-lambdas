@@ -1,4 +1,4 @@
-FROM ruby:3.3-alpine
+FROM ruby:3.3-alpine3.24@sha256:24ea89e8103548bc02b53ae5212313afaccc79d11c5f93982bd4de298ec0934d
 
 LABEL Author="Andrew Kane <andrew@ankane.org>"
 
@@ -22,12 +22,8 @@ RUN apk add --update build-base git libpq-dev mariadb-dev sqlite-dev libpq maria
     apk del build-base git libpq-dev mariadb-dev sqlite-dev && \
     rm -rf /var/cache/apk/*
 
-RUN apk add --no-cache ca-certificates && \
-    sed -i \
-      -e 's|^mozilla/emSign_ECC_Root_CA_-_G3.crt|!&|' \
-      -e 's|^mozilla/Comodo_AAA_Services_root.crt|!&|' \
-      /etc/ca-certificates.conf && \
-    update-ca-certificates --fresh
+# ca-certificates >= 20261020 no longer ships emSign ECC Root CA - G3 or Comodo AAA Services root
+RUN apk add --no-cache ca-certificates
 
 ENV PORT 8080
 

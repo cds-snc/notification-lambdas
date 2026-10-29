@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres@sha256:766e8867182b474f02e48c7b1a556d12ddfa246138ddc748d70c891bf2873d82
+    image: postgres:15-bookworm@sha256:daeac543477e189e334f159133f4be6dae739b005cec2dfb9d482509fed05465
     restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
