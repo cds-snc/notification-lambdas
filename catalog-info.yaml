@@ -3,9 +3,10 @@ kind: Component
 metadata:
   name: notification-lambdas
   title: Notification Lambdas
-  description: Repo that holds all of notify's lambdas
+  description: AWS Lambda functions supporting GC Notify.
   annotations:
     github.com/project-slug: cds-snc/notification-lambdas
+    backstage.io/source-location: url:https://github.com/cds-snc/notification-lambdas/tree/main/
   labels:
     license: MIT
 spec:
