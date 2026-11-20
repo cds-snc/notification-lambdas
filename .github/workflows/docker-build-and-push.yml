@@ -92,6 +92,8 @@ jobs:
         if: steps.changes.outputs.any_lambda == 'true' || steps.empty-commit.outputs.force_rebuild == 'true'
         working-directory: ${{ matrix.folder }}
         run: make docker
+        env:
+          BUILDX_NO_DEFAULT_ATTESTATIONS: "1"
 
       # Staging image push
       - name: Staging AWS credentials
