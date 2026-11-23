@@ -1,0 +1,5 @@
+boto3==1.26.23
+black==24.4.2
+pytest==8.2.0
+pytest-mock==3.8.0
+requests==2.31.0
